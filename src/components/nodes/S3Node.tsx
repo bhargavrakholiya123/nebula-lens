@@ -15,6 +15,10 @@ function S3Node({ data }: { data: any }) {
       className="relative min-w-[220px] rounded-xl backdrop-blur-md bg-white/60 border border-slate-200/50 p-4 shadow-sm"
     >
 
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none">
+        <Handle type="target" position={Position.Top} className="opacity-0" />
+        <Handle type="source" position={Position.Bottom} className="opacity-0" />
+      </div>
 
       {/* Node Header */}
       <div className="flex items-center gap-3">

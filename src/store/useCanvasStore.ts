@@ -1,5 +1,6 @@
 // src/store/useCanvasStore.ts
 import { create } from 'zustand';
+import { temporal } from 'zundo';
 import {
   Connection,
   Edge,
@@ -23,28 +24,40 @@ type CanvasState = {
   onConnect: (connection: Connection) => void;
 };
 
-// 2. Create the actual Zustand hook
-export const useCanvasStore = create<CanvasState>((set, get) => ({
-  // Set the initial data from the JSON file
-  nodes: initialData.nodes,
-  edges: initialData.edges,
+// 1. Wrap the store creator in `temporal`
+export const useCanvasStore = create<CanvasState>()(
+  temporal(
+    (set, get) => ({
+      nodes: initialData.nodes,
+      edges: initialData.edges,
 
-  // React Flow requires these three functions to handle dragging and connecting
-  onNodesChange: (changes: NodeChange[]) => {
-    set({
-      nodes: applyNodeChanges(changes, get().nodes),
-    });
-  },
-
-  onEdgesChange: (changes: EdgeChange[]) => {
-    set({
-      edges: applyEdgeChanges(changes, get().edges),
-    });
-  },
-
-  onConnect: (connection: Connection) => {
-    set({
-      edges: addEdge(connection, get().edges),
-    });
-  },
-}));
+      onNodesChange: (changes: NodeChange[]) => {
+        set({ nodes: applyNodeChanges(changes, get().nodes) });
+      },
+      onEdgesChange: (changes: EdgeChange[]) => {
+        set({ edges: applyEdgeChanges(changes, get().edges) });
+      },
+      onConnect: (connection: Connection) => {
+        set({ edges: addEdge(connection, get().edges) });
+      },
+    }),
+    {
+      // 2. Partialize: Tell Zundo exactly what to track for undo/redo
+      partialize: (state) => ({
+        nodes: state.nodes,
+        edges: state.edges,
+      }),
+      // Debounce the history snapshots
+      handleSet: (handleSet) => {
+        let timeout: ReturnType<typeof setTimeout>;
+        return (pastState, currentState, replace) => {
+          clearTimeout(timeout);
+          // Wait 250ms after the last change before saving to history
+          timeout = setTimeout(() => {
+            handleSet(pastState, currentState, replace);
+          }, 250);
+        };
+      },
+    }
+  )
+);
