@@ -10,8 +10,8 @@ function LambdaNode({ id, data, selected }: { id: string; data: any; selected?: 
   const { opacity, isHighlighted, isDimmed, heatmapColor, borderColor: lensBorderColor } = useLensVisuals(id);
 
   const activeBackgroundColor = heatmapColor
-    ? heatmapColor
-    : (selected || isHighlighted ? "rgba(249, 115, 22, 0.05)" : "rgba(255, 255, 255, 1)");
+  //   ? heatmapColor
+  //   : (selected || isHighlighted ? "rgba(249, 115, 22, 0.05)" : "rgba(255, 255, 255, 1)");
 
   const activeBorderColor = lensBorderColor
     ? lensBorderColor

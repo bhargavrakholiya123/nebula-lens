@@ -129,8 +129,12 @@ export default function MetricsSidebar() {
                       <motion.div
                         key={key}
                         variants={itemVariants}
-                        whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,1)" }}
-                        className="bg-white/50 p-4 rounded-xl border border-white/60 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] transition-colors"
+                        // 1. THE FIX: Explicitly set the initial state using standard RGBA
+                        initial={{ backgroundColor: "rgba(255, 255, 255, 0.5)" }}
+                        // 2. THE FIX: Animate smoothly to solid RGBA on hover
+                        whileHover={{ scale: 1.02, backgroundColor: "rgba(255, 255, 255, 1)" }}
+                        // 3. THE FIX: Remove 'bg-white/50' from this className string
+                        className="p-4 rounded-xl border border-white/60 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] transition-colors"
                       >
                         <p className="text-[11px] text-slate-500 font-bold mb-1 truncate uppercase tracking-wider">
                           {formatMetricLabel(key)}
