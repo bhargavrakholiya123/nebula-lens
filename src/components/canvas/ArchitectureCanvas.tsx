@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useCallback, useRef } from 'react';
-import { ReactFlow, Background, Controls, Panel } from '@xyflow/react';
+import { ReactFlow, Background, Controls, Panel, MiniMap} from '@xyflow/react';
 import { useStore } from 'zustand';
 import { useCanvasStore } from '../../store/useCanvasStore';
 
@@ -252,6 +252,38 @@ useEffect(() => {
 
         </Panel>
 <LensToolbar />
+
+
+          {/* 3. The Radar Radar (Bottom Right) */}
+          <MiniMap
+            zoomable
+            pannable
+            nodeColor={(node) => {
+              const type = node.type?.toLowerCase() || '';
+
+              // 1. Make network containers completely transparent
+              if (type.includes('vpc') || type.includes('subnet')) return 'transparent';
+
+              // 2. Color-code the services to match their UI icons
+              if (type.includes('api')) return '#a855f7';      // Purple
+              if (type.includes('sqs')) return '#d946ef';      // Pink
+              if (type.includes('lambda')) return '#f97316';   // Orange
+              if (type.includes('database')) return '#3b82f6'; // Blue
+              if (type.includes('s3')) return '#22c55e';       // Green
+
+              return '#cbd5e1'; // Default Fallback
+            }}
+            nodeStrokeColor={(node) => {
+              const type = node.type?.toLowerCase() || '';
+              // 3. Give the transparent containers a crisp purple outline
+              if (type.includes('vpc') || type.includes('subnet')) return '#8b5cf6';
+              return 'transparent';
+            }}
+            nodeStrokeWidth={2}
+            maskColor="rgba(248, 250, 252, 0.75)"
+            className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden"
+          />
+
       </ReactFlow>
       </div>
     </div>
