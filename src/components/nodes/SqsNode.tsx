@@ -83,7 +83,7 @@ const activeLens = useCanvasStore((state) => state.activeLens); // <-- Add this
         {/* 3. TYPOGRAPHY (Aligned and crisp) */}
         <div className="flex flex-col overflow-hidden">
           <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">
-            {data.type || 'Api Gateway'}
+            {data.type || 'SQS'}
           </h3>
           <h2 className="text-sm font-black text-slate-800 truncate">
             {data.name}

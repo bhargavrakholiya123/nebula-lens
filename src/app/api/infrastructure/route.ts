@@ -41,7 +41,7 @@ export async function GET() {
       "id": "api-gateway-ingress",
       "type": "apiGatewayNode",
       "parentId": null,
-      "position": { "x": -250, "y": 250 },
+      "position": { "x": -315, "y": 250 },
       "data": {
         "name": "Client API Gateway",
         "insights": "Rate limiting active.",
@@ -60,7 +60,7 @@ export async function GET() {
       "type": "sqsNode",
       "parentId": "subnet-private",
       "extent": "parent",
-      "position": { "x": 50, "y": 150 },
+      "position": { "x": 7, "y": 240 },
       "data": {
         "name": "Job Processing Queue",
         "insights": "5 messages in flight.",
@@ -76,7 +76,7 @@ export async function GET() {
       "type": "lambdaNode",
       "parentId": "subnet-private",
       "extent": "parent",
-      "position": { "x": 300, "y": 150 },
+      "position": { "x": 300, "y": 10 },
       "data": {
         "name": "Data Processor",
         "insights": "Warning: High memory usage.",
@@ -93,7 +93,7 @@ export async function GET() {
       "type": "databaseNode",
       "parentId": "subnet-private",
       "extent": "parent",
-      "position": { "x": 550, "y": 150 },
+      "position": { "x": 590, "y": 240 },
       "data": {
         "name": "MongoDB Atlas",
         "insights": "Healthy.",
