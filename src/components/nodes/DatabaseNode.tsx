@@ -6,11 +6,14 @@ import { Handle, Position } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { useLensVisuals } from '../../hooks/useLensVisuals';
 import Icon from "../../../public/icons/amazon-dynamodb.svg"
+import { useCanvasStore } from '../../store/useCanvasStore';
 
 const springTransition = { type: "spring", stiffness: 400, damping: 30 } as const;
 
 function DatabaseNode({ id, data, selected }: { id: string; data: any; selected?: boolean }) {
-  const { opacity, isHighlighted, isDimmed, heatmapColor, borderColor: lensBorderColor } = useLensVisuals(id);
+  const { opacity, isHighlighted, isDimmed, heatmapColor, borderColor: lensBorderColor, shadowColor } = useLensVisuals(id);
+  const activeLens = useCanvasStore((state) => state.activeLens);
+const cost = data.metrics?.estMonthlyCost;
 
   const activeBackgroundColor = heatmapColor
   //   ? heatmapColor
@@ -19,6 +22,12 @@ function DatabaseNode({ id, data, selected }: { id: string; data: any; selected?
   const activeBorderColor = lensBorderColor
     ? lensBorderColor
     : (selected || isHighlighted ? "rgba(249, 115, 22, 0)" : "rgba(226, 232, 240, 0.5)");
+
+    const activeShadow = shadowColor
+    ? `0px 8px 24px -4px ${shadowColor}`
+    : (selected || isHighlighted)
+      ? "0px 0px 0px 2px #3b82f6, 0px 10px 25px -5px rgba(59, 130, 246, 0.4)"
+      : "0px 2px 8px -2px rgba(0, 0, 0, 0.05), 0px 4px 12px -4px rgba(0, 0, 0, 0.05)";
 
   return (
     <motion.div
@@ -29,16 +38,29 @@ function DatabaseNode({ id, data, selected }: { id: string; data: any; selected?
         opacity: opacity,
         backgroundColor: activeBackgroundColor, // <- Apply it here!
         borderColor: activeBorderColor,
+        // boxShadow: activeShadow
         boxShadow: (selected || isHighlighted)
           ? "0px 0px 0px 2px #3b82f6, 0px 10px 25px -5px rgba(59, 130, 246, 0.4)"
-          : "0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px -1px rgba(0, 0, 0, 0.1)",
+          :activeShadow
+          // : "0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px -1px rgba(0, 0, 0, 0.1)",
        // borderColor: (selected || isHighlighted) ? "rgba(59, 130, 246, 0)" : "rgba(226, 232, 240, 0.5)",
       }}
       transition={springTransition} // This uses the same stiffness:400 spring as everything else!
       // Keep only the base layout classes here
       className="relative min-w-[200px] rounded-xl backdrop-blur-md bg-white/60 p-4 border"
     >
-
+      {/* THE NEW PRICE TAG BADGE */}
+      {activeLens === 'cost' && cost !== undefined && (
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="absolute -top-3 -right-3 z-50 bg-white border border-slate-200 shadow-lg rounded-full px-3 py-1 flex items-center gap-1"
+        >
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Est</span>
+          <span className="text-sm font-black text-slate-800">${cost}</span>
+          <span className="text-[10px] font-bold text-slate-500">/mo</span>
+        </motion.div>
+      )}
 
       {/* INVISIBLE OMNI-HANDLE:
   Placed in the exact center (top-1/2 left-1/2), but opacity-0 makes it invisible.

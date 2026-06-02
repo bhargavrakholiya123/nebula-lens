@@ -81,26 +81,27 @@ export function useLensVisuals(nodeId: string) {
       return { opacity: 0.2, isHighlighted: false, isDimmed: true, heatmapColor: undefined };
     }
 
-    // 4. The Heatmap Algorithm (Green -> Orange -> Red)
-    let heatmapColor = "rgba(34, 197, 94, 0.15)"; // Default: Tailwind green-500
-    let borderColor = "rgba(34, 197, 94, 0.5)";
+    // Ultra-light background tints with rich shadow glows
+    let heatmapColor = "rgba(34, 197, 94, 0.04)"; // 4% Green tint
+    let borderColor = "rgba(34, 197, 94, 0.4)";   // Crisp green border
+    let shadowColor = "rgba(34, 197, 94, 0.15)";  // Soft green glow
 
     if (cost > 500) {
-      // Critical Cost (Red)
-      heatmapColor = "rgba(239, 68, 68, 0.25)"; // Tailwind red-500
-      borderColor = "rgba(239, 68, 68, 0.8)";
+      heatmapColor = "rgba(239, 68, 68, 0.03)";   // 3% Red tint
+      borderColor = "rgba(239, 68, 68, 0.5)";     // Crisp red border
+      shadowColor = "rgba(239, 68, 68, 0.20)";    // Soft red glow
     } else if (cost > 100) {
-      // Warning Cost (Orange)
-      heatmapColor = "rgba(249, 115, 22, 0.2)"; // Tailwind orange-500
-      borderColor = "rgba(249, 115, 22, 0.6)";
+      heatmapColor = "rgba(249, 115, 22, 0.04)";  // 4% Orange tint
+      borderColor = "rgba(249, 115, 22, 0.5)";    // Crisp orange border
+      shadowColor = "rgba(249, 115, 22, 0.15)";   // Soft orange glow
     }
-
     return {
       opacity: 1,
       isHighlighted: false,
       isDimmed: false,
       heatmapColor,
-      borderColor // Passing the custom border color to the component
+      borderColor,
+      shadowColor
     };
   }
 

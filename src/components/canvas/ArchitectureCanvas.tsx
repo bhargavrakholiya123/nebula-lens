@@ -16,6 +16,7 @@ import SqsNode from '../nodes/SqsNode';
 import MetricsSidebar from '../ui/MetricsSidebar';
 import LensToolbar from '../ui/LensToolbar';
 import TopNav from '../ui/TopNav';
+import CloudEdge from './CloudEdge';
 
 const nodeTypes = {
   lambdaNode: LambdaNode,
