@@ -16,7 +16,6 @@ import SqsNode from '../nodes/SqsNode';
 import MetricsSidebar from '../ui/MetricsSidebar';
 import LensToolbar from '../ui/LensToolbar';
 import TopNav from '../ui/TopNav';
-import CloudEdge from './CloudEdge';
 
 const nodeTypes = {
   lambdaNode: LambdaNode,
@@ -233,7 +232,7 @@ useEffect(() => {
         onPaneClick={() => setSelectedNodeId(null)}
       >
         <Background color="#cbd5e1" gap={20} size={2} />
-        <Controls />
+        {/* <Controls /> */}
 
         <Panel position="top-left" className="bg-white/80 backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 flex gap-2">
           <button
@@ -253,7 +252,28 @@ useEffect(() => {
 
         </Panel>
 <LensToolbar />
-
+        {/* FinOps Cost Legend */}
+          {activeLens === 'cost' && (
+            <div className="absolute bottom-8 left-8 z-40 bg-white/80 backdrop-blur-xl border border-white shadow-xl rounded-2xl p-4 w-64">
+              <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-3">
+                Monthly Run Rate
+              </h3>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]" />
+                  <span className="text-xs font-bold text-slate-600">Critical (&gt; $500/mo)</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-orange-500/20 border border-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]" />
+                  <span className="text-xs font-bold text-slate-600">Warning (&gt; $100/mo)</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]" />
+                  <span className="text-xs font-bold text-slate-600">Optimized</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* 3. The Radar Radar (Bottom Right) */}
           <MiniMap

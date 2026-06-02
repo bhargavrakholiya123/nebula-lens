@@ -13,7 +13,7 @@ const springTransition = { type: "spring", stiffness: 400, damping: 30 } as cons
 function DatabaseNode({ id, data, selected }: { id: string; data: any; selected?: boolean }) {
   const { opacity, isHighlighted, isDimmed, heatmapColor, borderColor: lensBorderColor, shadowColor } = useLensVisuals(id);
   const activeLens = useCanvasStore((state) => state.activeLens);
-const cost = data.metrics?.estMonthlyCost;
+  const cost = data.metrics?.estMonthlyCost;
 
   const activeBackgroundColor = heatmapColor
   //   ? heatmapColor
