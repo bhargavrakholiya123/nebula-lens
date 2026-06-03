@@ -17,6 +17,7 @@ import MetricsSidebar from '../ui/MetricsSidebar';
 import LensToolbar from '../ui/LensToolbar';
 import TopNav from '../ui/TopNav';
 import { Button } from '@/components/ui/button';
+import NodeInspector from './NodeInspector';
 
 const nodeTypes = {
   lambdaNode: LambdaNode,
@@ -51,6 +52,8 @@ export default function ArchitectureCanvas() {
     fetchInfrastructure,
     isLoading
   } = useCanvasStore();
+
+const selectedNodeData = nodes.find((n) => n.id === selectedNodeId) || null;
 
   const { undo, redo, pastStates, futureStates } = useStore(
     useCanvasStore.temporal,
@@ -208,6 +211,8 @@ useEffect(() => {
     );
   }
 
+
+
   return (
     <div className="flex flex-col w-full h-screen bg-slate-50 overflow-hidden">
 
@@ -309,6 +314,11 @@ useEffect(() => {
           />
 
       </ReactFlow>
+
+      <NodeInspector
+        selectedNode={selectedNodeData}
+        onClose={() => setSelectedNodeId(null)}
+      />
       </div>
     </div>
   );
