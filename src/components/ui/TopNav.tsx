@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { Cloud, RefreshCw, Bell } from 'lucide-react';
 import { Button } from "./button";
 import { Badge } from "./badge";
 import { Separator } from "./separator";
 import Image from 'next/image';
-
+import { ThemeToggle } from './ToggleButton';
 export default function TopNav() {
   const isLoading = useCanvasStore((state) => state.isLoading);
   const fetchInfrastructure = useCanvasStore((state) => state.fetchInfrastructure);
@@ -68,7 +68,7 @@ export default function TopNav() {
 </Button>
 
 
-        {/* User Avatar */}
+        <ThemeToggle />
         <button className="bg-gradient-to-tr from-indigo-500 to-violet-500 w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-black shadow-sm hover:shadow-md transition-shadow">
           B
         </button>

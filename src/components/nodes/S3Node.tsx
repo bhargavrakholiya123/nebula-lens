@@ -45,7 +45,7 @@ function S3Node({ id, data, selected }: { id: string; data: any; selected?: bool
       }}
       transition={springTransition} // This uses the same stiffness:400 spring as everything else!
       // Keep only the base layout classes here
-      className="relative min-w-[200px] rounded-xl backdrop-blur-md bg-white/60 p-4 border"
+      className="relative min-w-[200px] rounded-xl backdrop-blur-md bg-white/60 dark:bg-slate-900/80 p-4 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200"
     >
 
       {/* THE NEW PRICE TAG BADGE */}
@@ -53,10 +53,10 @@ function S3Node({ id, data, selected }: { id: string; data: any; selected?: bool
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="absolute -top-3 -right-3 z-50 bg-white border border-slate-200 shadow-lg rounded-full px-3 py-1 flex items-center gap-1"
+          className="absolute -top-3 -right-3 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg rounded-full px-3 py-1 flex items-center gap-1"
         >
           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Est</span>
-          <span className="text-sm font-black text-slate-800">${cost}</span>
+          <span className="text-sm font-black text-slate-800 dark:text-slate-200">${cost}</span>
           <span className="text-[10px] font-bold text-slate-500">/mo</span>
         </motion.div>
       )}
@@ -69,7 +69,7 @@ function S3Node({ id, data, selected }: { id: string; data: any; selected?: bool
       {/* Node Header */}
       <div className="flex items-center gap-3">
         {/* 2. THE NEW ICON CONTAINER (Neutral, Glassy, Premium) */}
-        <div className="w-12 h-12 rounded-xl bg-white border border-slate-100 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] flex items-center justify-center shrink-0">
+        <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] flex items-center justify-center shrink-0">
           <Image
             src={Icon}
             alt="Database"
@@ -84,26 +84,26 @@ function S3Node({ id, data, selected }: { id: string; data: any; selected?: bool
           <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">
             {data.type || 'S3 Bucket'}
           </h3>
-          <h2 className="text-sm font-black text-slate-800 truncate">
+          <h2 className="text-sm font-black text-slate-800 dark:text-slate-200 truncate">
             {data.name}
           </h2>
         </div>
       </div>
 {/* Optional: Add a subtle divider before the metrics */}
-      <Separator className="bg-slate-100 my-1" />
+      <Separator className="bg-slate-100 dark:bg-slate-800 my-1" />
       {/* S3 Specific Metadata */}
       <div className="mt-3 space-y-1 text-xs text-slate-600">
         {/* <div className="flex justify-between items-center bg-slate-100/50 px-2 py-1 rounded">
           <span className="font-medium">Created:</span>
           <span>{data.creationDate}</span>
         </div> */}
-        <div className="flex justify-between items-center bg-slate-100/50 px-2 py-1 rounded">
-          <span className="font-medium">Access:</span>
-          <span className="text-amber-600 font-semibold">{data.publicAccess}</span>
+        <div className="flex justify-between items-center bg-slate-100/50 dark:bg-slate-950/50 px-2 py-1 rounded">
+          <span className="font-medium dark:text-slate-300">Access:</span>
+          <span className="text-amber-600 dark:text-amber-500 font-semibold">{data.publicAccess}</span>
         </div>
-        <div className="flex justify-between items-center bg-slate-100/50 px-2 py-1 rounded">
-          <span className="font-medium">TotalSize:</span>
-          <span className="text-slate-500 font-semibold">{data.metrics.totalSize}</span>
+        <div className="flex justify-between items-center bg-slate-100/50 dark:bg-slate-950/50 px-2 py-1 rounded">
+          <span className="font-medium dark:text-slate-300">TotalSize:</span>
+          <span className="text-slate-500 dark:text-slate-400 font-semibold">{data.metrics.totalSize}</span>
         </div>
       </div>
 

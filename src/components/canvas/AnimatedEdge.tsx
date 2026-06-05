@@ -182,7 +182,7 @@ export default function AnimatedEdge({
               zIndex: 100,
               opacity: currentOpacity, // <-- Apply opacity to the HTML label
             }}
-            className="nodrag nopan bg-white/95 backdrop-blur-xl px-3 py-1 rounded-full border-2 text-[10px] font-black shadow-sm uppercase tracking-widest transition-all duration-300"
+            className="nodrag nopan bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl px-3 py-1 rounded-full border-2 text-[10px] font-black shadow-sm uppercase tracking-widest transition-all duration-300"
           >
             {label}
           </div>

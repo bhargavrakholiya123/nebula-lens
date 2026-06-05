@@ -138,3 +138,5 @@
     @apply font-sans;
   }
 }
+
+@custom-variant dark (&:is(.dark *));

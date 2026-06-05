@@ -27,10 +27,10 @@ function SubnetNode({ id,data, selected }: { id: string; data: any; selected?: b
       </div>
 
       {/* Redesigned Architectural Header (Pinned to top-left) */}
-      <div className="absolute top-0 left-0 bg-blue-100/80 backdrop-blur-sm border-b-2 border-r-2 border-blue-200/50 rounded-tl-xl rounded-br-xl px-3 py-1.5 flex items-center gap-2 shadow-sm">
+      <div className="absolute top-0 left-0 bg-blue-100/80 dark:bg-blue-900/50 backdrop-blur-sm border-b-2 border-r-2 border-blue-200/50 dark:border-blue-800/50 rounded-tl-xl rounded-br-xl px-3 py-1.5 flex items-center gap-2 shadow-sm">
         <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-        <span className="text-xs font-extrabold tracking-wider text-blue-800 uppercase">Subnet</span>
-        <span className="text-xs font-semibold text-blue-600 truncate max-w-[150px]" title={data?.name}>
+        <span className="text-xs font-extrabold tracking-wider text-blue-800 dark:text-blue-300 uppercase">Subnet</span>
+        <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 truncate max-w-[150px]" title={data?.name}>
           {data?.name || 'Subnet'}
         </span>
       </div>

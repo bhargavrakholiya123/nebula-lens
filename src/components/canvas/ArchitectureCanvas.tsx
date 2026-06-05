@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef , useState} from 'react';
 import { ReactFlow, Background, Controls, Panel, MiniMap} from '@xyflow/react';
 import { useStore } from 'zustand';
 import { useCanvasStore } from '../../store/useCanvasStore';
@@ -17,6 +17,8 @@ import MetricsSidebar from '../ui/MetricsSidebar';
 import LensToolbar from '../ui/LensToolbar';
 import TopNav from '../ui/TopNav';
 import { Button } from '@/components/ui/button';
+
+import { useTheme } from 'next-themes';
 
 const nodeTypes = {
   lambdaNode: LambdaNode,
@@ -38,6 +40,11 @@ function springEase(t: number): number {
 const ANIMATION_DURATION = 400; // ms
 
 export default function ArchitectureCanvas() {
+  const { resolvedTheme } = useTheme();
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const {
     nodes,
     edges,
@@ -213,7 +220,7 @@ useEffect(() => {
 
 
   return (
-    <div className="flex flex-col w-full h-screen bg-slate-50 overflow-hidden">
+    <div className="flex flex-col w-full h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden">
 
       {/* TopNav at the very top */}
     <TopNav />
@@ -236,7 +243,14 @@ useEffect(() => {
         onNodeClick={(event, node) => setSelectedNodeId(node.id)}
         onPaneClick={() => setSelectedNodeId(null)}
       >
-        <Background color="#cbd5e1" gap={20} size={2} />
+
+        {/* Dynamic dot colors based on the theme! */}
+          <Background
+            color={mounted && resolvedTheme === 'dark' ? '#334155' : '#cbd5e1'}
+            gap={20}
+            size={2}
+          />
+        
         {/* <Controls /> */}
 
         <Panel position="top-left" className="bg-white/80 backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 flex gap-2">
@@ -258,7 +272,7 @@ useEffect(() => {
           </Button>
 
         </Panel>
-<LensToolbar />
+        <LensToolbar />
         {/* FinOps Cost Legend */}
           {activeLens === 'cost' && (
             <div className="absolute bottom-8 left-8 z-40 bg-white/80 backdrop-blur-xl border border-white shadow-xl rounded-2xl p-4 w-64">

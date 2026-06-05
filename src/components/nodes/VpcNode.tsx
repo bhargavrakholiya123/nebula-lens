@@ -27,10 +27,10 @@ function VpcNode({ id, data, selected }: { id: string; data: any; selected?: boo
       </div>
 
       {/* Redesigned Architectural Header (Pinned to top-left) */}
-      <div className="absolute top-0 left-0 bg-violet-100/80 backdrop-blur-sm border-b-2 border-r-2 border-violet-200/50 rounded-tl-xl rounded-br-xl px-3 py-1.5 flex items-center gap-2 shadow-sm">
+      <div className="absolute top-0 left-0 bg-violet-100/80 dark:bg-violet-900/50 backdrop-blur-sm border-b-2 border-r-2 border-violet-200/50 dark:border-violet-800/50 rounded-tl-xl rounded-br-xl px-3 py-1.5 flex items-center gap-2 shadow-sm">
         <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
-        <span className="text-xs font-extrabold tracking-wider text-violet-800 uppercase">VPC</span>
-        <span className="text-xs font-semibold text-violet-600 truncate max-w-[150px]" title={data?.name}>
+        <span className="text-xs font-extrabold tracking-wider text-violet-800 dark:text-violet-300 uppercase">VPC</span>
+        <span className="text-xs font-semibold text-violet-600 dark:text-violet-400 truncate max-w-[150px]" title={data?.name}>
           {data?.name || 'VPC'}
         </span>
       </div>
