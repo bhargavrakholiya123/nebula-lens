@@ -253,12 +253,12 @@ useEffect(() => {
         
         {/* <Controls /> */}
 
-        <Panel position="top-left" className="bg-white/80 backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 flex gap-2">
+        <Panel position="top-left" className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex gap-2">
           <Button
             variant="outline"
             onClick={executeUndo}
             disabled={pastStates.length === 0}
-            className="font-bold text-slate-700"
+            className="font-bold text-slate-700 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800"
           >
             ↩ Undo
           </Button>
@@ -266,7 +266,7 @@ useEffect(() => {
             variant="outline"
             onClick={executeRedo}
             disabled={futureStates.length === 0}
-            className="font-bold text-slate-700"
+            className="font-bold text-slate-700 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800"
           >
             Redo ↪
           </Button>
@@ -275,22 +275,22 @@ useEffect(() => {
         <LensToolbar />
         {/* FinOps Cost Legend */}
           {activeLens === 'cost' && (
-            <div className="absolute bottom-8 left-8 z-40 bg-white/80 backdrop-blur-xl border border-white shadow-xl rounded-2xl p-4 w-64">
-              <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-3">
+            <div className="absolute bottom-8 left-8 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl p-4 w-64">
+              <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest mb-3">
                 Monthly Run Rate
               </h3>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]" />
-                  <span className="text-xs font-bold text-slate-600">Critical (&gt; $500/mo)</span>
+                  <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Critical (&gt; $500/mo)</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full bg-orange-500/20 border border-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]" />
-                  <span className="text-xs font-bold text-slate-600">Warning (&gt; $100/mo)</span>
+                  <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Warning (&gt; $100/mo)</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]" />
-                  <span className="text-xs font-bold text-slate-600">Optimized</span>
+                  <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Optimized</span>
                 </div>
               </div>
             </div>

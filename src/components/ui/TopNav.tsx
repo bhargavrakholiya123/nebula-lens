@@ -13,13 +13,13 @@ export default function TopNav() {
   const fetchInfrastructure = useCanvasStore((state) => state.fetchInfrastructure);
 
   return (
-    <header className="flex items-center justify-between px-6 py-3 bg-white border-b border-slate-200 z-50">
+    <header className="flex items-center justify-between px-6 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-50">
 
       {/* Left: Branding & Logo */}
       <div className="flex items-center gap-3">
 
   {/* 1. THE LOGO FIX */}
-  <div className="flex items-center justify-center shrink-0 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-900/5">
+  <div className="flex items-center justify-center shrink-0 overflow-hidden rounded-xl bg-white dark:bg-slate-800 shadow-sm ring-1 ring-slate-900/5 dark:ring-slate-100/5">
     <Image
       src="/logo/singleLogo.svg"
       alt="Gravity Lens Logo"
@@ -33,13 +33,13 @@ export default function TopNav() {
 
   {/* 2. THE TYPOGRAPHY & NEW BADGE */}
   <div className="flex items-center gap-2.5">
-    <span className="font-black text-xl text-slate-800 tracking-tight">
+    <span className="font-black text-xl text-slate-800 dark:text-slate-100 tracking-tight">
       Gravity Lens
     </span>
 
     <Badge
       variant="secondary"
-      className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 text-slate-500 bg-slate-100 hover:bg-slate-200 border border-slate-200/50"
+      className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/50 dark:border-slate-700/50"
     >
       MVP Phase
     </Badge>
@@ -53,17 +53,17 @@ export default function TopNav() {
   variant="outline"
   onClick={() => fetchInfrastructure()}
   disabled={isLoading}
-  className="font-bold text-slate-600"
+  className="font-bold text-slate-600 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800"
   size = "lg"
 >
-  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-indigo-600' : ''}`} />
+  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-indigo-600 dark:text-indigo-400' : ''}`} />
   {isLoading ? 'Scanning AWS Engine...' : 'Sync Infrastructure'}
 </Button>
 
 
-        <Separator orientation="vertical" className="h-6 bg-slate-200" />
+        <Separator orientation="vertical" className="h-6 bg-slate-200 dark:bg-slate-700" />
 
-        <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-600">
+        <Button variant="ghost" size="icon" className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
   <Bell className="w-5 h-5" />
 </Button>
 
