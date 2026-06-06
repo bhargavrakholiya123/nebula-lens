@@ -24,7 +24,7 @@ function DatabaseNode({ id, data, selected }: { id: string; data: any; selected?
     ? lensBorderColor
     : (selected || isHighlighted ? "rgba(249, 115, 22, 0)" : "rgba(226, 232, 240, 0.5)");
 
-    const activeShadow = shadowColor
+  const activeShadow = shadowColor
     ? `0px 8px 24px -4px ${shadowColor}`
     : (selected || isHighlighted)
       ? "0px 0px 0px 2px #3b82f6, 0px 10px 25px -5px rgba(59, 130, 246, 0.4)"
@@ -37,14 +37,14 @@ function DatabaseNode({ id, data, selected }: { id: string; data: any; selected?
       //framer motion animation
       animate={{
         opacity: opacity,
-        backgroundColor: activeBackgroundColor, // <- Apply it here!
+        // backgroundColor: activeBackgroundColor, // <- Apply it here!
         borderColor: activeBorderColor,
         // boxShadow: activeShadow
         boxShadow: (selected || isHighlighted)
           ? "0px 0px 0px 2px #3b82f6, 0px 10px 25px -5px rgba(59, 130, 246, 0.4)"
-          :activeShadow
-          // : "0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px -1px rgba(0, 0, 0, 0.1)",
-       // borderColor: (selected || isHighlighted) ? "rgba(59, 130, 246, 0)" : "rgba(226, 232, 240, 0.5)",
+          : activeShadow
+        // : "0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px -1px rgba(0, 0, 0, 0.1)",
+        // borderColor: (selected || isHighlighted) ? "rgba(59, 130, 246, 0)" : "rgba(226, 232, 240, 0.5)",
       }}
       transition={springTransition} // This uses the same stiffness:400 spring as everything else!
       // Keep only the base layout classes here
@@ -67,10 +67,10 @@ function DatabaseNode({ id, data, selected }: { id: string; data: any; selected?
   Placed in the exact center (top-1/2 left-1/2), but opacity-0 makes it invisible.
   Our Smart Edge will calculate the real boundaries dynamically!
 */}
-<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none">
-  <Handle type="target" position={Position.Top} className="opacity-0" />
-  <Handle type="source" position={Position.Bottom} className="opacity-0" />
-</div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none">
+        <Handle type="target" position={Position.Top} className="opacity-0" />
+        <Handle type="source" position={Position.Bottom} className="opacity-0" />
+      </div>
 
       {/* Node Header */}
       <div className="flex items-center gap-3">
@@ -95,7 +95,7 @@ function DatabaseNode({ id, data, selected }: { id: string; data: any; selected?
           </h2>
         </div>
       </div>
-{/* Optional: Add a subtle divider before the metrics */}
+      {/* Optional: Add a subtle divider before the metrics */}
       <Separator className="bg-slate-100 dark:bg-slate-800 my-1" />
 
       {/* DB Specific Metadata */}

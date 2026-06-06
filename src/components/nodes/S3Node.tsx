@@ -17,14 +17,14 @@ function S3Node({ id, data, selected }: { id: string; data: any; selected?: bool
   const cost = data.metrics?.estMonthlyCost;
 
   const activeBackgroundColor = heatmapColor
-    // ? heatmapColor
-    // : (selected || isHighlighted ? "rgba(249, 115, 22, 0.05)" : "rgba(255, 255, 255, 1)");
+  // ? heatmapColor
+  // : (selected || isHighlighted ? "rgba(249, 115, 22, 0.05)" : "rgba(255, 255, 255, 1)");
 
   const activeBorderColor = lensBorderColor
     ? lensBorderColor
     : (selected || isHighlighted ? "rgba(249, 115, 22, 0)" : "rgba(226, 232, 240, 0.5)");
 
-    const activeShadow = shadowColor
+  const activeShadow = shadowColor
     ? `0px 8px 24px -4px ${shadowColor}`
     : (selected || isHighlighted)
       ? "0px 0px 0px 2px #3b82f6, 0px 10px 25px -5px rgba(59, 130, 246, 0.4)"
@@ -36,7 +36,7 @@ function S3Node({ id, data, selected }: { id: string; data: any; selected?: bool
       //framer motion animation
       animate={{
         opacity: opacity,
-        backgroundColor: activeBackgroundColor, // <- Apply it here!
+        // backgroundColor: activeBackgroundColor, // <- Apply it here!
         borderColor: activeBorderColor,
         boxShadow: (selected || isHighlighted)
           ? "0px 0px 0px 2px #3b82f6, 0px 10px 25px -5px rgba(59, 130, 246, 0.4)"
@@ -89,7 +89,7 @@ function S3Node({ id, data, selected }: { id: string; data: any; selected?: bool
           </h2>
         </div>
       </div>
-{/* Optional: Add a subtle divider before the metrics */}
+      {/* Optional: Add a subtle divider before the metrics */}
       <Separator className="bg-slate-100 dark:bg-slate-800 my-1" />
       {/* S3 Specific Metadata */}
       <div className="mt-3 space-y-1 text-xs text-slate-600">
