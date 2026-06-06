@@ -144,10 +144,9 @@ export default function ContextualInspector() {
                 </h4>
 
                 {isCostLens ? (
-                  <div className="w-full h-48 bg-slate-50 dark:bg-slate-900/50 rounded-xl p-2 border border-slate-200 dark:border-slate-800 flex flex-col justify-center">
-                  <ResponsiveContainer width="100%" height={160}>
-                    {/* 🚀 FIX: Added bottom: 30 margin to push the bar away from the legend */}
-                    <BarChart layout="vertical" data={costBreakdown} margin={{ top: 10, right: 10, left: -20, bottom: 30 }}>
+                  <div className="w-full h-56 bg-slate-50 dark:bg-slate-900/50 rounded-xl p-3 border border-slate-200 dark:border-slate-800">
+                  <ResponsiveContainer width="100%" height={196}>
+                    <BarChart layout="vertical" data={costBreakdown} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
                       <XAxis type="number" hide />
                       <YAxis dataKey="name" type="category" hide />
                       <Tooltip
@@ -155,8 +154,7 @@ export default function ContextualInspector() {
                         contentStyle={{ backgroundColor: '#020617', borderColor: '#1e293b', borderRadius: '8px', fontSize: '12px' }}
                         formatter={(value) => `$${Number(value).toFixed(2)}`}
                       />
-                      {/* 🚀 Ensure the legend renders nicely at the bottom */}
-                      <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }} verticalAlign="bottom" />
+                      <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }} verticalAlign="bottom" />
 
                       {Object.keys(COST_COLORS).map(key => (
                         <Bar key={key} dataKey={key} stackId="a" fill={COST_COLORS[key as keyof typeof COST_COLORS]} radius={[0, 0, 0, 0]} />
