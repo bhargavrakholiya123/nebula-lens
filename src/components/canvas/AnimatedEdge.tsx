@@ -11,7 +11,7 @@ import {
 } from '@xyflow/react';
 
 import { useCanvasStore } from '../../store/useCanvasStore';
-
+import { useBlastRadius } from '../../hooks/useBlastRadius';
 export default function AnimatedEdge({
   id,
   source,
@@ -29,13 +29,18 @@ export default function AnimatedEdge({
   const activeLens = useCanvasStore((state) => state.activeLens);
   const selectedNodeId = useCanvasStore((state) => state.selectedNodeId);
 
+  const { affectedNodeIds } = useBlastRadius(selectedNodeId);
   // Calculate if this specific edge should be dimmed
+  // 🚀 UPGRADE: Check if BOTH the source and target are inside the blast radius path
   const isBlastRadiusMode = activeLens === 'blast-radius' && selectedNodeId !== null;
+  const isInsideBlastRadius = (affectedNodeIds.has(source) || source === selectedNodeId) &&
+                              (affectedNodeIds.has(target) || target === selectedNodeId);
+
+  // If we are in blast radius mode, and this edge is NOT part of the failure path, dim it.
+  const isDimmed = isBlastRadiusMode && !isInsideBlastRadius;
+  const currentOpacity = isDimmed ? 0.1 : 1;
   const isConnectedToSelected = source === selectedNodeId || target === selectedNodeId;
 
-  // If we are in blast radius mode, and this edge DOES NOT connect to the selected node, dim it.
-  const isDimmed = isBlastRadiusMode && !isConnectedToSelected;
-  const currentOpacity = isDimmed ? 0.1 : 1;
 
   // If the nodes haven't rendered yet, don't draw the edge
   if (!sourceNode || !targetNode) return null;

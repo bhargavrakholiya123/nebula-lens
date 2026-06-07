@@ -13,7 +13,6 @@ import VpcNode from '../nodes/VpcNode';
 import SubnetNode from '../nodes/SubnetNode';
 import ApiGatewayNode from '../nodes/ApiGatewayNode';
 import SqsNode from '../nodes/SqsNode';
-import MetricsSidebar from '../ui/MetricsSidebar';
 import LensToolbar from '../ui/LensToolbar';
 import TopNav from '../ui/TopNav';
 import { Button } from '@/components/ui/button';
@@ -227,9 +226,8 @@ useEffect(() => {
 
     {/* 3. Wrap React Flow in a flex-1 container so it fills the remaining height */}
     <div className="flex-1 relative w-full h-full">
-      {/* Sidebar here! */}
-      <MetricsSidebar />
-    <div className="flex-1 h-full relative pl-[288px] pr-[320px]"> {/* 288px = w-72, 320px = w-80 */}
+
+    <div className="flex-1 h-full relative  pr-[320px]"> {/* 288px = w-72, 320px = w-80 */}
       <ReactFlow
         nodes={nodes}
         edges={edges}
