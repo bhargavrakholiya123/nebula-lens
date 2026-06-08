@@ -10,16 +10,11 @@ export default function AvailabilityZoneNode({ data, selected }: any) {
         ? 'border-indigo-500 bg-indigo-500/5 shadow-[0_0_30px_rgba(99,102,241,0.1)]'
         : 'border-slate-300 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-900/20'
     }`}>
-
-      {/* Top-Left AZ Label Pill matching VPC and Subnet */}
-      <div className="absolute -top-3 left-8 px-3 py-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-full flex items-center gap-2 shadow-sm z-10">
-        {/* Status Dot matching your other containers */}
-        <div className="w-2 h-2 rounded-full bg-indigo-500" />
-
-        {/* Typography matching VPC/Subnet format (BOLD TYPE + Normal Name) */}
-        <span className="text-[10px] uppercase tracking-widest text-slate-700 dark:text-slate-300">
-          <strong className="font-black mr-1">AZ</strong>
-          <span className="opacity-80">{data.name || 'ap-south-1a'}</span>
+      <div className="absolute top-0 left-0 bg-green-100/80 dark:bg-green-900/50 backdrop-blur-sm border-b-2 border-r-2 border-green-200/50 dark:border-green-800/50 rounded-tl-xl rounded-br-xl px-3 py-1.5 flex items-center gap-2 shadow-sm">
+        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+        <span className="text-xs font-extrabold tracking-wider text-green-800 dark:text-green-300 uppercase">Az</span>
+        <span className="text-xs font-semibold text-green-600 dark:text-green-400 truncate max-w-[150px]" title={data?.name}>
+          {data?.name || 'ap-south-1a'}
         </span>
       </div>
 
