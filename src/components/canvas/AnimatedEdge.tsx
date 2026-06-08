@@ -12,6 +12,7 @@ import {
 
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useBlastRadius } from '../../hooks/useBlastRadius';
+import { useSecurityAudit } from '../../hooks/useSecurityAudit';
 export default function AnimatedEdge({
   id,
   source,
@@ -37,6 +38,9 @@ export default function AnimatedEdge({
   const liveTelemetry = actualSourceNode?.data?.telemetryData as any[];
   const currentTraffic = liveTelemetry ? liveTelemetry[liveTelemetry.length - 1] : null;
 
+  const isSecurityLens = activeLens === 'security';
+  const { vulnerableNodeIds } = useSecurityAudit();
+
   // Calculate if this specific edge should be dimmed
   // Check if BOTH the source and target are inside the blast radius path
   const isBlastRadiusMode = activeLens === 'blast-radius' && selectedNodeId !== null;
@@ -44,7 +48,7 @@ export default function AnimatedEdge({
 
   // If we are in blast radius mode, and this edge is NOT part of the failure path, dim it.
   const isDimmed = isBlastRadiusMode && !isInsideBlastRadius;
-  const currentOpacity = isDimmed ? 0.1 : 1;
+  let currentOpacity = isDimmed ? 0.1 : 1;
   const isConnectedToSelected = source === selectedNodeId || target === selectedNodeId;
 
 
@@ -189,6 +193,23 @@ export default function AnimatedEdge({
       edgeWidth = 2;
       glowColor = 'rgba(16, 185, 129, 0.3)';
       duration = '3s';
+    }
+  }
+  // 🚀 THE SEC-OPS UPGRADE: Cyber Security Lens Overrides
+  if (isSecurityLens) {
+    // If this edge points TO or FROM a vulnerable node, highlight it as an Attack Vector
+    if (vulnerableNodeIds.has(source) || vulnerableNodeIds.has(target)) {
+      strokeColor = '#f59e0b'; // Amber warning
+      particleColor = '#ef4444'; // Red malicious traffic
+      edgeWidth = 3;
+      glowColor = 'rgba(245, 158, 11, 0.4)';
+      strokeDasharray = '4,4'; // Jagged, aggressive dash
+      duration = '1.5s'; // Fast moving threats
+    } else {
+      // Safe paths dim into the background
+      strokeColor = '#334155';
+      particleColor = '#475569';
+      currentOpacity = 0.2;
     }
   }
 

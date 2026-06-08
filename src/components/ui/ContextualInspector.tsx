@@ -6,9 +6,10 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { AnimatePresence, motion } from 'framer-motion';
 //  ADDED: Server and Zap icons from the old sidebar
-import { X, TrendingDown, AlertTriangle, ShieldAlert, Activity, Server, Zap } from 'lucide-react';
+import { X, TrendingDown, AlertTriangle, ShieldAlert, Activity, Server, Zap, Shield } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 import { useBlastRadius } from '../../hooks/useBlastRadius';
+import { useSecurityAudit } from '../../hooks/useSecurityAudit';
 
 const CHART_COLORS = ['#38bdf8', '#34d399', '#f472b6', '#fbbf24'];
 // 🚀 Expand the colors to support deep networking metrics
@@ -41,12 +42,13 @@ export default function ContextualInspector() {
   const activeLens = useCanvasStore((state) => state.activeLens);
   const isCostLens = activeLens === 'cost';
   const isBlastRadiusLens = activeLens === 'blast-radius';
+  const isSecurityLens = activeLens === 'security';
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
   const data = selectedNode?.data as Record<string, any> | undefined;
 
   const { affectedNodes } = useBlastRadius(selectedNodeId);
-
+  const { vulnerabilities, score } = useSecurityAudit();
   //  BROUGHT OVER: Global calculations for the empty state
   const resourceTypesCount = new Set(nodes.map(n => n.type)).size;
   const estimatedGlobalCost = useMemo(() => {
@@ -119,6 +121,16 @@ export default function ContextualInspector() {
       headerBg = 'bg-red-50/80 dark:bg-red-950/40 border-red-100 dark:border-red-900/50';
       headerText = 'text-red-600 dark:text-red-400';
       panelTitle = 'Impact Analysis Report';
+    }
+    else {
+      // Global Overview States
+      if (isSecurityLens) {
+        headerBg = 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-100 dark:border-amber-900/50';
+        headerText = 'text-amber-600 dark:text-amber-400';
+        panelTitle = 'Security Posture Report';
+      } else {
+        panelTitle = 'Global Overview';
+      }
     }
   }
 
@@ -310,6 +322,40 @@ export default function ContextualInspector() {
           ) : (
             // REPLACED: Empty State is now the Global Overview!
             <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+
+
+              {/* 🚀 THE CYBER SECURITY REPORT */}
+              {isSecurityLens && (
+                <div className="mb-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="p-4 rounded-xl border bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest flex items-center gap-2">
+                        <Shield className="w-3 h-3" /> Risk Score
+                      </h4>
+                      <span className={`text-2xl font-black ${score > 80 ? 'text-emerald-500' : score > 60 ? 'text-amber-500' : 'text-red-500'}`}>
+                        {score}<span className="text-sm text-slate-500 font-medium">/100</span>
+                      </span>
+                    </div>
+
+                    <Separator className="bg-amber-200 dark:bg-amber-900/50 mb-4" />
+
+                    <div className="space-y-3">
+                      {vulnerabilities.map((vuln, idx) => (
+                        <div key={idx} className="p-3 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-amber-100 dark:border-amber-900/30">
+                          <div className="flex items-center gap-2 mb-1">
+                            <ShieldAlert className={`w-3 h-3 ${vuln.severity === 'critical' ? 'text-red-500' : vuln.severity === 'high' ? 'text-orange-500' : 'text-amber-500'}`} />
+                            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{vuln.name}</span>
+                          </div>
+                          <p className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-2">{vuln.issue}</p>
+                          <p className="text-[9px] leading-relaxed text-slate-500 dark:text-slate-500 border-l-2 border-amber-300 dark:border-amber-700 pl-2">
+                            {vuln.remediation}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Environment Status */}
               <div>

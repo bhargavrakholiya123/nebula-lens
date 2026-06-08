@@ -3,7 +3,7 @@
 import { Button } from './button';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { motion } from 'framer-motion';
-import { Network, Orbit, CircleDollarSign, Download } from 'lucide-react'; // Added Download Icon
+import { Network, Orbit, CircleDollarSign, Download, ShieldCheck } from 'lucide-react';// Added Download Icon
 import { Panel } from '@xyflow/react';
 import { toPng } from 'html-to-image'; // Added html-to-image engine
 
@@ -11,6 +11,7 @@ const lenses = [
   { id: 'structural', label: 'Structural', icon: Network },
   { id: 'blast-radius', label: 'Blast Radius', icon: Orbit },
   { id: 'cost', label: 'Cost Topology', icon: CircleDollarSign },
+  { id: 'security', label: 'Security Posture', icon: ShieldCheck },
 ] as const;
 
 export default function LensToolbar() {
