@@ -6,68 +6,110 @@ export async function GET() {
 
   const mockAwsArchitecture = {
     "nodes": [
+      // {
+      //   "id": "vpc-main",
+      //   "type": "VPC",
+      //   "parentId": null,
+      //   "position": { "x": 0, "y": 0 },
+      //   "style": { "width": 900, "height": 500 },
+      //   "data": {
+      //     "name": "Production VPC",
+      //     "status": "healthy",
+      //     "insights": "Flow logs enabled.",
+      //     "tags": {
+      //       "Environment": "Production",
+      //       "ManagedBy": "Terraform",
+      //       "CostCenter": "CC-4921"
+      //     },
+      //     "metrics": {
+      //       "cidrBlock": "10.0.0.0/16",
+      //       "region": "ap-south-1",
+      //       "activeGateways": 2,
+      //       "vpcEndpoints": 0,
+      //       "estMonthlyCost": 420 // 🚀 ADDED Cost
+      //     },
+      //     "telemetryData": [ // 🚀 ADDED Time-series network data
+      //       { "time": "08:00", "natTrafficGB": 12, "egressTrafficGB": 8, "crossAzTrafficGB": 5 },
+      //       { "time": "08:15", "natTrafficGB": 15, "egressTrafficGB": 10, "crossAzTrafficGB": 7 },
+      //       { "time": "08:30", "natTrafficGB": 18, "egressTrafficGB": 14, "crossAzTrafficGB": 8 },
+      //       { "time": "08:45", "natTrafficGB": 22, "egressTrafficGB": 18, "crossAzTrafficGB": 10 },
+      //       { "time": "09:00", "natTrafficGB": 65, "egressTrafficGB": 45, "crossAzTrafficGB": 35 },
+      //       { "time": "09:15", "natTrafficGB": 24, "egressTrafficGB": 19, "crossAzTrafficGB": 12 }
+      //     ]
+      //   }
+      // },
+      // {
+      //   "id": "subnet-private",
+      //   "type": "Subnet",
+      //   "parentId": "vpc-main",
+      //   "extent": "parent",
+      //   "position": { "x": 50, "y": 80 },
+      //   "style": { "width": 800, "height": 380 },
+      //   "data": {
+      //     "name": "Private Compute Subnet",
+      //     "status": "healthy",
+      //     "insights": "No direct internet access.",
+      //     "tags": {
+      //       "Environment": "Production",
+      //       "Tier": "Private",
+      //       "AvailabilityZone": "ap-south-1a"
+      //     },
+      //     "metrics": {
+      //       "cidrBlock": "10.0.1.0/24",
+      //       "availabilityZone": "ap-south-1a",
+      //       "availableIPs": "184",
+      //       "estMonthlyCost": 180 // 🚀 ADDED Cost
+      //     },
+      //     "telemetryData": [ // 🚀 ADDED Time-series network data
+      //       { "time": "08:00", "dataTransferIn": 45, "dataTransferOut": 32 },
+      //       { "time": "08:15", "dataTransferIn": 50, "dataTransferOut": 38 },
+      //       { "time": "08:30", "dataTransferIn": 55, "dataTransferOut": 45 },
+      //       { "time": "08:45", "dataTransferIn": 60, "dataTransferOut": 52 },
+      //       { "time": "09:00", "dataTransferIn": 180, "dataTransferOut": 145 },
+      //       { "time": "09:15", "dataTransferIn": 65, "dataTransferOut": 48 }
+      //     ]
+      //   }
+      // },
+
       {
         "id": "vpc-main",
         "type": "VPC",
         "parentId": null,
         "position": { "x": 0, "y": 0 },
-        "style": { "width": 900, "height": 500 },
+        "style": { "width": 900, "height": 520 }, // Slightly taller to fit the AZ
         "data": {
           "name": "Production VPC",
-          "status": "healthy",
           "insights": "Flow logs enabled.",
-          "tags": {
-            "Environment": "Production",
-            "ManagedBy": "Terraform",
-            "CostCenter": "CC-4921"
-          },
-          "metrics": {
-            "cidrBlock": "10.0.0.0/16",
-            "region": "ap-south-1",
-            "activeGateways": 2,
-            "vpcEndpoints": 0,
-            "estMonthlyCost": 420 // 🚀 ADDED Cost
-          },
-          "telemetryData": [ // 🚀 ADDED Time-series network data
-            { "time": "08:00", "natTrafficGB": 12, "egressTrafficGB": 8, "crossAzTrafficGB": 5 },
-            { "time": "08:15", "natTrafficGB": 15, "egressTrafficGB": 10, "crossAzTrafficGB": 7 },
-            { "time": "08:30", "natTrafficGB": 18, "egressTrafficGB": 14, "crossAzTrafficGB": 8 },
-            { "time": "08:45", "natTrafficGB": 22, "egressTrafficGB": 18, "crossAzTrafficGB": 10 },
-            { "time": "09:00", "natTrafficGB": 65, "egressTrafficGB": 45, "crossAzTrafficGB": 35 },
-            { "time": "09:15", "natTrafficGB": 24, "egressTrafficGB": 19, "crossAzTrafficGB": 12 }
-          ]
+          "metrics": { "cidrBlock": "10.0.0.0/16", "region": "ap-south-1", "estMonthlyCost": 420 },
+          "telemetryData": [ { "time": "08:00", "natTrafficGB": 12 }, { "time": "08:15", "natTrafficGB": 15 } ]
         }
       },
+      //  NEW: The Availability Zone Layer
+      {
+        "id": "az-1a",
+        "type": "AvailabilityZone",
+        "parentId": "vpc-main",
+        "extent": "parent",
+        "position": { "x": 25, "y": 40 },
+        "style": { "width": 850, "height": 450 },
+        "data": {
+          "name": "ap-south-1a",
+          "insights": "Physical Data Center boundaries.",
+          "metrics": { "status": "Operational", "powerGrid": "Stable" }
+        }
+      },
+      //  UPDATED: Subnet is now a child of the AZ!
       {
         "id": "subnet-private",
         "type": "Subnet",
-        "parentId": "vpc-main",
+        "parentId": "az-1a",
         "extent": "parent",
-        "position": { "x": 50, "y": 80 },
+        "position": { "x": 25, "y": 40 }, // Relative to AZ now
         "style": { "width": 800, "height": 380 },
         "data": {
           "name": "Private Compute Subnet",
-          "status": "healthy",
-          "insights": "No direct internet access.",
-          "tags": {
-            "Environment": "Production",
-            "Tier": "Private",
-            "AvailabilityZone": "ap-south-1a"
-          },
-          "metrics": {
-            "cidrBlock": "10.0.1.0/24",
-            "availabilityZone": "ap-south-1a",
-            "availableIPs": "184",
-            "estMonthlyCost": 180 // 🚀 ADDED Cost
-          },
-          "telemetryData": [ // 🚀 ADDED Time-series network data
-            { "time": "08:00", "dataTransferIn": 45, "dataTransferOut": 32 },
-            { "time": "08:15", "dataTransferIn": 50, "dataTransferOut": 38 },
-            { "time": "08:30", "dataTransferIn": 55, "dataTransferOut": 45 },
-            { "time": "08:45", "dataTransferIn": 60, "dataTransferOut": 52 },
-            { "time": "09:00", "dataTransferIn": 180, "dataTransferOut": 145 },
-            { "time": "09:15", "dataTransferIn": 65, "dataTransferOut": 48 }
-          ]
+          "metrics": { "cidrBlock": "10.0.1.0/24", "estMonthlyCost": 180 },
+          "telemetryData": [ { "time": "08:00", "dataTransferIn": 45 }, { "time": "08:15", "dataTransferIn": 50 } ]
         }
       },
       {

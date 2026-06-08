@@ -19,7 +19,7 @@ export default function AnimatedEdge({
   style = {},
   label,
   markerEnd,
-  data, // 🚀 NEW: Added data prop to access our transferCost
+  data, // NEW: Added data prop to access our transferCost
 }: EdgeProps) {
   // 1. Hook into React Flow's internal state to watch node coordinates in real-time
   const sourceNode = useInternalNode(source);
@@ -31,10 +31,9 @@ export default function AnimatedEdge({
 
   const { affectedNodeIds } = useBlastRadius(selectedNodeId);
   // Calculate if this specific edge should be dimmed
-  // 🚀 UPGRADE: Check if BOTH the source and target are inside the blast radius path
+  // Check if BOTH the source and target are inside the blast radius path
   const isBlastRadiusMode = activeLens === 'blast-radius' && selectedNodeId !== null;
-  const isInsideBlastRadius = (affectedNodeIds.has(source) || source === selectedNodeId) &&
-                              (affectedNodeIds.has(target) || target === selectedNodeId);
+  const isInsideBlastRadius = (affectedNodeIds.has(source) || source === selectedNodeId) && (affectedNodeIds.has(target) || target === selectedNodeId);
 
   // If we are in blast radius mode, and this edge is NOT part of the failure path, dim it.
   const isDimmed = isBlastRadiusMode && !isInsideBlastRadius;
@@ -126,7 +125,7 @@ export default function AnimatedEdge({
     strokeDasharray = '6,6';
   }
 
-  // 7. 🚀 THE UPGRADE: Cost Topology Lens Overrides
+  // 7.  THE UPGRADE: Cost Topology Lens Overrides
   const isCostLens = activeLens === 'cost';
   const transferCost = (data?.transferCost as number) || 0;
 
@@ -213,7 +212,7 @@ export default function AnimatedEdge({
                 : 'bg-white/95 dark:bg-slate-900/90'
             }`}
           >
-            {/* 🚀 Dynamic Label text based on active lens */}
+            {/*  Dynamic Label text based on active lens */}
             {isCostLens ? (
               <span className="flex items-center gap-1">
                 {transferCost > 100 && <span className="animate-pulse text-red-500">⚠️</span>}

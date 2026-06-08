@@ -18,6 +18,7 @@ import TopNav from '../ui/TopNav';
 import { Button } from '@/components/ui/button';
 import ContextualInspector from '../ui/ContextualInspector';
 import { useTheme } from 'next-themes';
+import AvailabilityZoneNode from '../nodes/AvailabilityZoneNode';
 
 const nodeTypes = {
   lambdaNode: LambdaNode,
@@ -28,6 +29,7 @@ const nodeTypes = {
   Subnet: SubnetNode,
   apiGatewayNode: ApiGatewayNode,
   sqsNode: SqsNode,
+  AvailabilityZone: AvailabilityZoneNode,
 };
 const edgeTypes = { animatedEdge: AnimatedEdge };
 
