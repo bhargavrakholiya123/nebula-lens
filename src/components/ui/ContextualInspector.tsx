@@ -155,7 +155,7 @@ export default function ContextualInspector() {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 relative">
+      <div className="flex-1 overflow-y-auto p-5 relative" style={{ maskImage: 'linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%)' }}>
         <AnimatePresence mode="wait">
           {selectedNode && data ? (
             <motion.div key="selected" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }} className="space-y-6">

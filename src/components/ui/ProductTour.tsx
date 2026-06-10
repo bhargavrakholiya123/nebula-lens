@@ -44,7 +44,7 @@ interface SpotlightRect {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// TOUR STEPS — Reordered per user feedback:
+// TOUR STEPS 
 //   1. Canvas → 2. Live Telemetry → 3. Lens Toolbar → 4. Blast Radius
 //   → 5. Blast Inspector → 6. Cost → 7. Cost Inspector → 8. Security
 //   → 9. Compliance → 10. Undo/Redo → 11. Export → 12. Complete

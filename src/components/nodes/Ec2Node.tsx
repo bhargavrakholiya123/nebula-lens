@@ -5,13 +5,14 @@ import Image from 'next/image';
 import { Handle, Position } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { useLensVisuals } from '../../hooks/useLensVisuals';
+import NodeTooltip from '../ui/NodeTooltip';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { Separator } from '../ui/separator';
 import Icon from "../../../public/icons/amazon-ec2.svg";
 
 const springTransition = { type: "spring", stiffness: 400, damping: 30 } as const;
 
-function Ec2Node({ id, data, selected }: { id: string; data: any; selected?: boolean }) {
+function Ec2Node({ id, data, selected, positionAbsoluteX }: { id: string; data: any; selected?: boolean; positionAbsoluteX?: number }) {
   const { opacity, isHighlighted, isDimmed, heatmapColor, borderColor: lensBorderColor, shadowColor } = useLensVisuals(id);
   const activeLens = useCanvasStore((state) => state.activeLens);
   const cost = data.metrics?.estMonthlyCost;
@@ -27,17 +28,23 @@ function Ec2Node({ id, data, selected }: { id: string; data: any; selected?: boo
       : "0px 2px 8px -2px rgba(0, 0, 0, 0.05), 0px 4px 12px -4px rgba(0, 0, 0, 0.05)";
 
   return (
+    <NodeTooltip name={data.name} type={data.service?.toUpperCase() || 'EC2 Instance'} metrics={data.metrics}>
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.97 }}
+      initial={{ scale: 0.8, opacity: 0 }}
       animate={{
+        scale: 1,
         opacity: opacity,
         borderColor: activeBorderColor,
         boxShadow: (selected || isHighlighted)
           ? "0px 0px 0px 2px #3b82f6, 0px 10px 25px -5px rgba(59, 130, 246, 0.4)"
           : activeShadow,
       }}
-      transition={springTransition}
+      transition={{ 
+        ...springTransition, 
+        delay: Math.max(0, ((positionAbsoluteX || 0) + 400) * 0.0004) 
+      }}
       className={`relative min-w-[200px] rounded-xl backdrop-blur-md bg-white/60 dark:bg-slate-900/80 p-4 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 ${isDimmed ? 'pointer-events-none grayscale-[50%]' : ''}`}
     >
       {activeLens === 'cost' && cost !== undefined && (
@@ -98,6 +105,7 @@ function Ec2Node({ id, data, selected }: { id: string; data: any; selected?: boo
         </div>
       )}
     </motion.div>
+    </NodeTooltip>
   );
 }
 

@@ -5,12 +5,13 @@ import { Handle, Position } from '@xyflow/react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useLensVisuals } from '../../hooks/useLensVisuals';
+import NodeTooltip from '../ui/NodeTooltip';
 import Icon from "../../../public/icons/amazon-simple-storage-service.svg"
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { Separator } from '../ui/separator';
 const springTransition = { type: "spring", stiffness: 400, damping: 30 } as const;
 
-function S3Node({ id, data, selected }: { id: string; data: any; selected?: boolean }) {
+function S3Node({ id, data, selected, positionAbsoluteX }: { id: string; data: any; selected?: boolean; positionAbsoluteX?: number }) {
   const { opacity, isHighlighted, isDimmed, heatmapColor, borderColor: lensBorderColor, shadowColor } = useLensVisuals(id);
   const activeLens = useCanvasStore((state) => state.activeLens); // <-- Add this
 
@@ -30,11 +31,14 @@ function S3Node({ id, data, selected }: { id: string; data: any; selected?: bool
       ? "0px 0px 0px 2px #3b82f6, 0px 10px 25px -5px rgba(59, 130, 246, 0.4)"
       : "0px 2px 8px -2px rgba(0, 0, 0, 0.05), 0px 4px 12px -4px rgba(0, 0, 0, 0.05)";
   return (
+    <NodeTooltip name={data.name} type={data.type || 'S3 Bucket'} metrics={data.metrics}>
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.97 }}
       //framer motion animation
+      initial={{ scale: 0.8, opacity: 0 }}
       animate={{
+        scale: 1,
         opacity: opacity,
         // backgroundColor: activeBackgroundColor, // <- Apply it here!
         borderColor: activeBorderColor,
@@ -43,7 +47,10 @@ function S3Node({ id, data, selected }: { id: string; data: any; selected?: bool
           : activeShadow,
         //borderColor: (selected || isHighlighted) ? "rgba(59, 130, 246, 0)" : "rgba(226, 232, 240, 0.5)",
       }}
-      transition={springTransition} // This uses the same stiffness:400 spring as everything else!
+      transition={{ 
+        ...springTransition, 
+        delay: Math.max(0, ((positionAbsoluteX || 0) + 400) * 0.0004) 
+      }}
       // Keep only the base layout classes here
       className="relative min-w-[200px] rounded-xl backdrop-blur-md bg-white/60 dark:bg-slate-900/80 p-4 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200"
     >
@@ -110,6 +117,7 @@ function S3Node({ id, data, selected }: { id: string; data: any; selected?: bool
 
 
     </motion.div>
+    </NodeTooltip>
   );
 }
 

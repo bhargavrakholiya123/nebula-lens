@@ -5,21 +5,25 @@ import { Handle, Position } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { useLensVisuals } from '../../hooks/useLensVisuals';
 
-function AvailabilityZoneNode({ id, data, selected }: { id: string; data: any; selected?: boolean }) {
+function AvailabilityZoneNode({ id, data, selected, positionAbsoluteX }: { id: string; data: any; selected?: boolean; positionAbsoluteX?: number }) {
   const { opacity, isHighlighted, isDimmed } = useLensVisuals(id);
 
   return (
     <motion.div
+      initial={{ opacity: 0 }}
       animate={{
         opacity: opacity,
         borderColor: (selected || isHighlighted)
-          ? "rgba(99, 102, 241, 0.8)"
-          : "rgba(148, 163, 184, 0.4)",
+          ? "rgba(14, 165, 233, 0.8)"
+          : "rgba(14, 165, 233, 0.4)",
         backgroundColor: (selected || isHighlighted)
-          ? "rgba(99, 102, 241, 0.05)"
-          : "rgba(148, 163, 184, 0.01)",
+          ? "rgba(14, 165, 233, 0.05)"
+          : "rgba(14, 165, 233, 0.01)",
       }}
-      transition={{ duration: 0.2 }}
+      transition={{ 
+        duration: 0.5,
+        delay: Math.max(0, ((positionAbsoluteX || 0) + 400) * 0.0004)
+      }}
       className={`relative w-full h-full border-2 border-dashed rounded-2xl pointer-events-auto ${
         isDimmed ? 'pointer-events-none' : ''
       }`}

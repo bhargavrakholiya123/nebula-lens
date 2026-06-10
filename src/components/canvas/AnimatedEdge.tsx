@@ -263,19 +263,26 @@ export default function AnimatedEdge({
       </circle>
 
       {/* Renders the text label */}
-      {(label || isCostLens) && (
-        <EdgeLabelRenderer>
-          <div
-            style={{
-              position: 'absolute',
-              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY - 20}px)`,
-              pointerEvents: isDimmed ? 'none' : 'auto',
-              color: isCostLens && transferCost > 100 ? '#ef4444' : particleColor,
-              borderColor: strokeColor,
-              boxShadow: `0 4px 12px -4px ${glowColor !== 'transparent' ? glowColor : strokeColor}`,
-              zIndex: 100,
-              opacity: currentOpacity,
-            }}
+      {(label || isCostLens) && (() => {
+        // Simple deterministic offset based on edge ID to prevent label stacking
+        const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const randVal = ((hash % 100) / 100) * 2 - 1; // range -1 to 1
+        const offsetY = -20 + (randVal * 25); // Scatter Y by +/- 25px
+        const offsetX = randVal * 20;         // Scatter X by +/- 20px
+
+        return (
+          <EdgeLabelRenderer>
+            <div
+              style={{
+                position: 'absolute',
+                transform: `translate(-50%, -50%) translate(${labelX + offsetX}px,${labelY + offsetY}px)`,
+                pointerEvents: isDimmed ? 'none' : 'auto',
+                color: isCostLens && transferCost > 100 ? '#ef4444' : particleColor,
+                borderColor: strokeColor,
+                boxShadow: `0 4px 12px -4px ${glowColor !== 'transparent' ? glowColor : strokeColor}`,
+                zIndex: 100,
+                opacity: currentOpacity,
+              }}
             className={`nodrag nopan backdrop-blur-xl px-3 py-1 rounded-full border-2 text-[10px] font-black shadow-sm uppercase tracking-widest transition-all duration-300 ${
               isCostLens
                 ? 'bg-white/95 dark:bg-slate-950/95' // 🚀 FIX: Changed to bg-white for light mode
@@ -293,7 +300,8 @@ export default function AnimatedEdge({
             )}
           </div>
         </EdgeLabelRenderer>
-      )}
+        );
+      })()}
     </>
   );
 }

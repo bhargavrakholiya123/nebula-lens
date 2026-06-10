@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Cloud, RefreshCw, Bell, RotateCcw } from 'lucide-react';
 import { Button } from "./button";
 import { Badge } from "./badge";
@@ -12,6 +13,7 @@ export default function TopNav() {
   const isLoading = useCanvasStore((state) => state.isLoading);
   const fetchInfrastructure = useCanvasStore((state) => state.fetchInfrastructure);
   const setTourActive = useCanvasStore((state) => state.setTourActive);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   const replayTour = () => {
     localStorage.removeItem('gravity-lens-tour-complete');
@@ -70,9 +72,67 @@ export default function TopNav() {
 
         <Separator orientation="vertical" className="h-6 bg-slate-200 dark:bg-slate-700" />
 
-        <Button variant="ghost" size="icon" className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
-  <Bell className="w-5 h-5" />
-</Button>
+        <div className="relative">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+            className={`text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 relative ${isNotificationsOpen ? 'bg-slate-100 dark:bg-slate-800' : ''}`}
+          >
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse border-2 border-white dark:border-slate-900" />
+          </Button>
+
+          <AnimatePresence>
+            {isNotificationsOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                className="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-[0_12px_32px_-12px_rgba(0,0,0,0.15)] overflow-hidden z-[100]"
+              >
+                <div className="p-3 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Notifications</span>
+                  <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 cursor-pointer hover:underline">Mark all as read</span>
+                </div>
+                <div className="max-h-[300px] overflow-y-auto">
+                  {/* Mock alerts */}
+                  <div className="p-4 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
+                    <div className="flex gap-3">
+                      <div className="w-2 h-2 mt-1.5 rounded-full bg-red-500 shrink-0 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                      <div>
+                        <p className="text-xs font-bold text-slate-800 dark:text-slate-200">High Latency: Ingress API</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Average response time exceeded 60ms threshold across 3 AZs.</p>
+                        <p className="text-[9px] font-black text-slate-400 mt-2 uppercase tracking-widest">2 mins ago</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
+                    <div className="flex gap-3">
+                      <div className="w-2 h-2 mt-1.5 rounded-full bg-amber-500 shrink-0 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+                      <div>
+                        <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Cost Spike Detected</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">MongoDB Atlas projected cost increased by 15% due to high IOPS.</p>
+                        <p className="text-[9px] font-black text-slate-400 mt-2 uppercase tracking-widest">1 hour ago</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
+                    <div className="flex gap-3">
+                      <div className="w-2 h-2 mt-1.5 rounded-full bg-emerald-500 shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+                      <div>
+                        <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Deployment Successful</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">VPC configuration updated automatically.</p>
+                        <p className="text-[9px] font-black text-slate-400 mt-2 uppercase tracking-widest">3 hours ago</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         <Button
           variant="ghost"

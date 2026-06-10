@@ -6,18 +6,22 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useLensVisuals } from '../../hooks/useLensVisuals';
 import Icon from "../../../public/icons/amazon-virtual-private-cloud.svg"
-function VpcNode({ id, data, selected }: { id: string; data: any; selected?: boolean }) {
+function VpcNode({ id, data, selected, positionAbsoluteX }: { id: string; data: any; selected?: boolean; positionAbsoluteX?: number }) {
   const { opacity, isHighlighted, isDimmed } = useLensVisuals(id);
   return (
     <motion.div
       // We remove the scale animation so the whole screen doesn't shake!
+      initial={{ opacity: 0 }}
       animate={{
         opacity: opacity,
         // Smooth transition for the border and background on selection
         borderColor: (selected || isHighlighted) ? "rgba(139, 92, 246, 0.8)" : "rgba(139, 92, 246, 0.4)",
         backgroundColor: (selected || isHighlighted) ? "rgba(139, 92, 246, 0.05)" : "rgba(139, 92, 246, 0.01)",
       }}
-      transition={{ duration: 0.2 }}
+      transition={{ 
+        duration: 0.5,
+        delay: Math.max(0, ((positionAbsoluteX || 0) + 400) * 0.0004)
+      }}
       // THE FIX: w-full h-full, dashed border, transparent background
       className="relative w-full h-full rounded-xl border-2 border-dashed pointer-events-auto"
     >
