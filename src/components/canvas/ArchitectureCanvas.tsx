@@ -245,7 +245,7 @@ export default function ArchitectureCanvas() {
           initial="initial"
           animate="animate"
           data-tour-id="canvas-viewport" 
-          className={`flex-1 h-full relative transition-all duration-300 ${selectedNodeId ? 'pr-[320px]' : 'pr-12'}`}
+          className={`flex-1 h-full relative transition-[padding] duration-[280ms] ease-in-out ${selectedNodeId ? 'pr-[360px]' : 'pr-12'}`}
         >
           <ReactFlow
             nodes={nodes}

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCanvasStore } from '../../store/useCanvasStore';
+import { springSmooth, springSnappy, scaleIn } from '../../lib/motion';
 import { GraphIcon, PlanetIcon, CurrencyDollarIcon, ShieldCheckIcon, ArrowRightIcon, ArrowLeftIcon, XIcon, PlayIcon, SparkleIcon, CursorClickIcon, PulseIcon, DownloadSimpleIcon, ArrowUUpLeftIcon, EyeIcon, ShieldIcon } from '@phosphor-icons/react';
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -350,22 +351,11 @@ function SpotlightOverlay({
 }) {
   if (disableDimming) return null;
 
-  // Fullscreen dim
-  if (isFullscreen || !rect) {
-    return (
-      <motion.div
-        key="fullscreen-overlay"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.35 }}
-        className="fixed inset-0 z-[200] bg-slate-950/60 backdrop-blur-[2px]"
-      />
-    );
-  }
-
-  // Use previous rect as initial for smooth spring transition
-  const initial = prevRect || rect;
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 1920;
+  const vh = typeof window !== 'undefined' ? window.innerHeight : 1080;
+  
+  const targetRect = isFullscreen || !rect ? { x: vw / 2, y: vh / 2, width: 0, height: 0 } : rect;
+  const initial = prevRect || targetRect;
 
   return (
     <motion.div
@@ -374,71 +364,40 @@ function SpotlightOverlay({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
-      className="fixed inset-0 z-[200] pointer-events-none"
+      className="fixed inset-0 z-[200] pointer-events-none backdrop-blur-[2px]"
     >
-      {/* SVG mask overlay */}
       <svg width="100%" height="100%" className="absolute inset-0" style={{ pointerEvents: 'auto' }}>
         <defs>
           <mask id="tour-spotlight-mask">
             <rect width="100%" height="100%" fill="white" />
             <motion.rect
-              initial={{
-                x: initial.x,
-                y: initial.y,
-                width: initial.width,
-                height: initial.height,
-              }}
-              animate={{
-                x: rect.x,
-                y: rect.y,
-                width: rect.width,
-                height: rect.height,
-              }}
-              transition={{ type: 'spring', stiffness: 180, damping: 26, mass: 1 }}
+              initial={{ x: initial.x, y: initial.y, width: initial.width, height: initial.height }}
+              animate={{ x: targetRect.x, y: targetRect.y, width: targetRect.width, height: targetRect.height }}
+              transition={springSmooth as any}
               rx={borderRadius}
               ry={borderRadius}
               fill="black"
             />
           </mask>
         </defs>
-        <rect
-          width="100%"
-          height="100%"
-          fill="rgba(2, 6, 23, 0.62)"
-          mask="url(#tour-spotlight-mask)"
-        />
+        <rect width="100%" height="100%" fill="rgba(2, 6, 23, 0.65)" mask="url(#tour-spotlight-mask)" />
       </svg>
-
-      {/* Pulse ring — single absolutely-positioned div, no nesting confusion */}
-      <motion.div
-        initial={{
-          left: initial.x - 5,
-          top: initial.y - 5,
-          width: initial.width + 10,
-          height: initial.height + 10,
-        }}
-        animate={{
-          left: rect.x - 5,
-          top: rect.y - 5,
-          width: rect.width + 10,
-          height: rect.height + 10,
-        }}
-        transition={{ type: 'spring', stiffness: 180, damping: 26, mass: 1 }}
-        className="absolute pointer-events-none"
-        style={{ borderRadius: borderRadius + 4 }}
-      >
+      {(!isFullscreen && rect) && (
         <motion.div
-          className="absolute inset-0 border-2 border-indigo-400/50"
+          initial={{ left: initial.x - 5, top: initial.y - 5, width: initial.width + 10, height: initial.height + 10 }}
+          animate={{ left: targetRect.x - 5, top: targetRect.y - 5, width: targetRect.width + 10, height: targetRect.height + 10 }}
+          transition={springSmooth as any}
+          className="absolute pointer-events-none"
           style={{ borderRadius: borderRadius + 4 }}
-          animate={{
-            boxShadow: [
-              '0 0 0 0px rgba(99, 102, 241, 0.2)',
-              '0 0 0 12px rgba(99, 102, 241, 0)',
-            ],
-          }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeOut' }}
-        />
-      </motion.div>
+        >
+          <motion.div
+            className="absolute inset-0 border-2 border-[var(--gl-brand-accent,#7C6FF7)]"
+            style={{ borderRadius: borderRadius + 4 }}
+            animate={{ boxShadow: ['0 0 0 0px rgba(124, 111, 247, 0.2)', '0 0 0 12px rgba(124, 111, 247, 0)'] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeOut' as any }}
+          />
+        </motion.div>
+      )}
     </motion.div>
   );
 }
@@ -451,29 +410,34 @@ function getTooltipPosition(
   placement: TooltipPlacement,
   tooltipW: number,
   tooltipH: number
-): { top: number; left: number } | null {
+): { top: number; left: number; origin: string } | null {
   if (!rect || placement === 'center') return null; // use CSS centering
 
   const gap = 20;
   let top = 0;
   let left = 0;
+  let origin = 'center center';
 
   switch (placement) {
     case 'bottom':
       top = rect.y + rect.height + gap;
       left = rect.x + rect.width / 2 - tooltipW / 2;
+      origin = 'top center';
       break;
     case 'top':
       top = rect.y - tooltipH - gap;
       left = rect.x + rect.width / 2 - tooltipW / 2;
+      origin = 'bottom center';
       break;
     case 'left':
       top = rect.y + rect.height / 2 - tooltipH / 2;
       left = rect.x - tooltipW - gap;
+      origin = 'center right';
       break;
     case 'right':
       top = rect.y + rect.height / 2 - tooltipH / 2;
       left = rect.x + rect.width + gap;
+      origin = 'center left';
       break;
   }
 
@@ -483,7 +447,7 @@ function getTooltipPosition(
   top = Math.max(12, Math.min(top, vh - tooltipH - 12));
   left = Math.max(12, Math.min(left, vw - tooltipW - 12));
 
-  return { top, left };
+  return { top, left, origin };
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -699,6 +663,16 @@ export default function ProductTour() {
     <AnimatePresence mode="wait">
       {isOpen && (
         <>
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+            onClick={endTour}
+            className="fixed top-6 right-8 z-[305] text-[12px] font-medium text-slate-400 hover:text-slate-200 transition-colors pointer-events-auto"
+          >
+            Skip tour
+          </motion.button>
+
           {/* ── Spotlight Overlay ── */}
           <SpotlightOverlay
             rect={spotlightRect}
@@ -713,32 +687,23 @@ export default function ProductTour() {
             {showTooltip && (
               <motion.div
                 key={`tooltip-${step.id}`}
-                initial={{ opacity: 0, y: 16, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -12, scale: 0.96 }}
-                transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+                variants={scaleIn as any}
+                initial="hidden"
+                animate="visible"
+                exit={{ opacity: 0, transition: { duration: 0.1 } }}
                 style={{
                   position: 'fixed',
                   width: tooltipW,
                   zIndex: 301,
+                  transformOrigin: isCentered ? 'center center' : position!.origin,
                   ...(isCentered
-                    ? { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
+                    ? { top: '50%', left: '50%', x: '-50%', y: '-50%' }
                     : { top: position!.top, left: position!.left }
                   ),
                 }}
                 className="pointer-events-auto"
               >
                 <div className="bg-white/[0.97] dark:bg-slate-950/[0.97] backdrop-blur-2xl border border-slate-200/80 dark:border-slate-700/60 rounded-2xl shadow-[0_20px_60px_-12px_rgba(0,0,0,0.25)] overflow-hidden">
-
-                  {/* Gradient progress bar */}
-                  <div className="h-1 bg-slate-100 dark:bg-slate-900 w-full">
-                    <motion.div
-                      className="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500"
-                      animate={{ width: `${((currentStep + 1) / TOUR_STEPS.length) * 100}%` }}
-                      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    />
-                  </div>
-
                   <div className="p-5">
                     {/* Header row */}
                     <div className="flex items-start justify-between mb-3">
@@ -746,55 +711,44 @@ export default function ProductTour() {
                         <div className={`p-2 rounded-xl border ${accent.iconBg} ${accent.iconBorder} shrink-0`}>
                           <StepIcon weight="duotone" className={`w-5 h-5 ${accent.text}`} />
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 mb-0.5">
-                            Step {currentStep + 1} of {TOUR_STEPS.length}
-                          </p>
-                          <h3 className="text-[14px] font-black text-slate-900 dark:text-white leading-snug">
-                            {step.title}
-                          </h3>
-                        </div>
+                        <h3 className="text-[15px] font-medium text-slate-900 dark:text-white leading-snug">
+                          {step.title}
+                        </h3>
                       </div>
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={endTour}
-                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-1.5 -mr-1.5 -mt-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
-                      >
-                        <XIcon weight="bold" className="w-4 h-4" />
-                      </motion.button>
+                      <p className="text-[12px] font-medium text-slate-400 dark:text-slate-500 mt-1">
+                        {currentStep + 1} of {TOUR_STEPS.length}
+                      </p>
                     </div>
 
                     {/* Description */}
-                    <p className="text-[12.5px] text-slate-600 dark:text-slate-400 leading-[1.65] mb-5">
+                    <p className="text-[13px] text-slate-600 dark:text-slate-400 leading-[1.6] mb-5">
                       {step.description}
                     </p>
 
-                    {/* Step dots */}
-                    <div className="flex items-center justify-center gap-1.5 mb-4">
-                      {TOUR_STEPS.map((_, i) => (
-                        <motion.div
-                          key={i}
-                          className={`rounded-full ${i === currentStep
-                              ? 'w-5 h-1.5 bg-indigo-500'
-                              : i < currentStep
-                                ? 'w-1.5 h-1.5 bg-indigo-400/60'
-                                : 'w-1.5 h-1.5 bg-slate-200 dark:bg-slate-700'
-                            }`}
-                          layout
-                          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                        />
-                      ))}
-                    </div>
-
                     {/* Navigation */}
-                    <div className="flex items-center justify-between">
-                      <button
-                        onClick={endTour}
-                        className="text-[11px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                      >
-                        Skip Tour
-                      </button>
+                    <div className="flex items-center justify-between mt-2">
+                      {/* Step dots */}
+                      <div className="flex items-center gap-2">
+                        {TOUR_STEPS.map((_, i) => (
+                          <motion.div
+                            key={i}
+                            className={`rounded-full ${
+                              i === currentStep
+                                ? 'bg-[var(--gl-brand-accent,#7C6FF7)]'
+                                : i < currentStep
+                                  ? 'bg-[var(--gl-brand-accent,#7C6FF7)] opacity-50'
+                                  : 'bg-slate-200 dark:bg-slate-700'
+                            }`}
+                            initial={false}
+                            animate={{ 
+                              scale: i === currentStep ? 1.4 : 1,
+                              width: 6,
+                              height: 6
+                            }}
+                            transition={springSnappy as any}
+                          />
+                        ))}
+                      </div>
 
                       <div className="flex gap-2">
                         <motion.button
@@ -802,21 +756,17 @@ export default function ProductTour() {
                           whileTap={currentStep !== 0 ? { scale: 0.95 } : {}}
                           onClick={handlePrev}
                           disabled={currentStep === 0}
-                          className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-25 disabled:cursor-not-allowed transition-all"
+                          className="flex items-center justify-center h-[32px] px-4 rounded-[6px] text-[13px] font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
                         >
-                          <ArrowLeftIcon weight="bold" className="w-4 h-4" />
+                          Previous
                         </motion.button>
                         <motion.button
                           whileHover={{ scale: 1.03 }}
                           whileTap={{ scale: 0.97 }}
                           onClick={handleNext}
-                          className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-indigo-500/25"
+                          className="flex items-center justify-center gap-2 h-[32px] px-4 bg-[var(--gl-brand-accent,#7C6FF7)] hover:opacity-90 text-white text-[13px] font-medium rounded-[6px] shadow-[0_4px_12px_rgba(124,111,247,0.3)] transition-all"
                         >
-                          {currentStep === TOUR_STEPS.length - 1 ? 'Start Exploring' : 'Next'}
-                          {currentStep === TOUR_STEPS.length - 1
-                            ? <PlayIcon weight="fill" className="w-3 h-3" />
-                            : <ArrowRightIcon weight="bold" className="w-3 h-3" />
-                          }
+                          {currentStep === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}
                         </motion.button>
                       </div>
                     </div>

@@ -66,13 +66,13 @@ export const fadeOut: MotionVariant = {
 export const slideInRight: MotionVariant = {
   initial: { x: "100%" },
   animate: { x: 0, transition: springSmooth },
-  exit: { x: "100%", transition: springSmooth },
+  exit: { x: "100%", transition: { duration: 0.2, ease: "easeIn" } },
 };
 
 export const slideOutRight: MotionVariant = {
   initial: { x: 0 },
-  animate: { x: "100%", transition: springSmooth },
-  exit: { x: "100%", transition: springSmooth },
+  animate: { x: "100%", transition: { duration: 0.2, ease: "easeIn" } },
+  exit: { x: "100%", transition: { duration: 0.2, ease: "easeIn" } },
 };
 
 export const scaleIn: MotionVariant = {
