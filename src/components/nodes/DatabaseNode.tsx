@@ -4,6 +4,7 @@ import React, { memo } from 'react';
 import Image from 'next/image';
 import { Handle, Position } from '@xyflow/react';
 import { motion } from 'framer-motion';
+import { scaleIn } from '../../lib/motion';
 import { useLensVisuals } from '../../hooks/useLensVisuals';
 import NodeTooltip from '../ui/NodeTooltip';
 import Icon from "../../../public/icons/amazon-dynamodb.svg"
@@ -21,41 +22,34 @@ function DatabaseNode({ id, data, selected, positionAbsoluteX }: { id: string; d
   //   ? heatmapColor
   //   : (selected || isHighlighted ? "rgba(249, 115, 22, 0.05)" : "rgba(255, 255, 255, 1)");
 
-  const activeBorderColor = lensBorderColor
-    ? lensBorderColor
-    : (selected || isHighlighted ? "rgba(249, 115, 22, 0)" : "rgba(226, 232, 240, 0.5)");
-
   const activeShadow = shadowColor
-    ? `0px 8px 24px -4px ${shadowColor}`
-    : (selected || isHighlighted)
-      ? "0px 0px 0px 2px #3b82f6, 0px 10px 25px -5px rgba(59, 130, 246, 0.4)"
-      : "0px 2px 8px -2px rgba(0, 0, 0, 0.05), 0px 4px 12px -4px rgba(0, 0, 0, 0.05)";
+    ? `0px 4px 12px ${shadowColor}`
+    : "0px 4px 12px rgba(0, 0, 0, 0.1)";
 
   return (
     <NodeTooltip name={data.name} type={data.type || 'Database'} metrics={data.metrics}>
     <motion.div
-      whileHover={{ scale: 1.02 }}
+      whileHover={{ 
+        scale: 1.02, 
+        borderColor: (selected || isHighlighted) ? "#7C6FF7" : "rgba(255, 255, 255, 0.18)",
+        transition: { duration: 0.15, ease: "easeOut" }
+      }}
       whileTap={{ scale: 0.97 }}
-      //framer motion animation
-      initial={{ scale: 0.8, opacity: 0 }}
+      initial={{ scale: 0.95, opacity: 0 }}
       animate={{
         scale: 1,
         opacity: opacity,
-        // backgroundColor: activeBackgroundColor, // <- Apply it here!
-        borderColor: activeBorderColor,
-        // boxShadow: activeShadow
+        borderColor: (selected || isHighlighted) ? "#7C6FF7" : "rgba(255, 255, 255, 0.08)",
+        borderWidth: (selected || isHighlighted) ? "1px" : "0.5px",
         boxShadow: (selected || isHighlighted)
-          ? "0px 0px 0px 2px #3b82f6, 0px 10px 25px -5px rgba(59, 130, 246, 0.4)"
+          ? "0 0 0 3px rgba(124, 111, 247, 0.15)"
           : activeShadow
-        // : "0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px -1px rgba(0, 0, 0, 0.1)",
-        // borderColor: (selected || isHighlighted) ? "rgba(59, 130, 246, 0)" : "rgba(226, 232, 240, 0.5)",
       }}
       transition={{ 
         ...springTransition, 
         delay: Math.max(0, ((positionAbsoluteX || 0) + 400) * 0.0004) 
       }}
-      // Keep only the base layout classes here
-      className="relative min-w-[200px] rounded-xl backdrop-blur-md bg-white/60 dark:bg-slate-900/80 p-4 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200"
+      className="relative min-w-[200px] rounded-[10px] backdrop-blur-[8px] bg-white/60 dark:bg-slate-900/80 p-4 border-solid text-slate-800 dark:text-slate-200"
     >
       {/* THE NEW PRICE TAG BADGE */}
       {activeLens === 'cost' && cost !== undefined && (
@@ -64,9 +58,9 @@ function DatabaseNode({ id, data, selected, positionAbsoluteX }: { id: string; d
           animate={{ scale: 1, opacity: 1 }}
           className="absolute -top-3 -right-3 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg rounded-full px-3 py-1 flex items-center gap-1"
         >
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Est</span>
-          <span className="text-sm font-black text-slate-800 dark:text-slate-200">${cost}</span>
-          <span className="text-[10px] font-bold text-slate-500">/mo</span>
+          <span className="text-[10px] font-medium tracking-[0.6px] uppercase text-[var(--gl-text-muted)]">Est</span>
+          <span className="text-[15px] font-medium tracking-[-0.3px] text-[var(--gl-text-primary)]">${cost}</span>
+          <span className="text-[12px] font-normal text-[var(--gl-text-muted)]">/mo</span>
         </motion.div>
       )}
 
@@ -94,10 +88,10 @@ function DatabaseNode({ id, data, selected, positionAbsoluteX }: { id: string; d
 
         {/* 3. TYPOGRAPHY (Aligned and crisp) */}
         <div className="flex flex-col overflow-hidden">
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">
+          <h3 className="text-[10px] font-medium tracking-[0.6px] uppercase text-[var(--gl-text-muted)] truncate">
             {data.type || 'Database'}
           </h3>
-          <h2 className="text-sm font-black text-slate-800 dark:text-slate-200 truncate">
+          <h2 className="text-[15px] font-medium tracking-[-0.3px] text-[var(--gl-text-primary)] truncate">
             {data.name}
           </h2>
         </div>
@@ -107,14 +101,14 @@ function DatabaseNode({ id, data, selected, positionAbsoluteX }: { id: string; d
 
       {/* DB Specific Metadata */}
       {data.status && (
-        <div className="mt-3 flex items-center gap-2 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50/50 dark:bg-indigo-950/50 p-2 rounded-md border border-indigo-100 dark:border-indigo-900/50">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <div className="mt-3 flex items-center gap-2 text-[12px] font-normal text-[var(--gl-text-muted)] bg-indigo-50/50 dark:bg-indigo-950/50 p-2 rounded-md border border-indigo-100 dark:border-indigo-900/50">
+          <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: data.status?.toLowerCase() === 'running' || data.status?.toLowerCase() === 'healthy' || data.status?.toLowerCase() === 'available' ? '#1D9E75' : '#BA7517' }}></span>
           {data.status}
         </div>
       )}
       {data.insights && (
-        <div className="mt-3 flex items-center gap-2 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50/50 dark:bg-indigo-950/50 p-2 rounded-md border border-indigo-100 dark:border-indigo-900/50">
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+        <div className="mt-3 flex items-center gap-2 text-[12px] font-normal text-[var(--gl-text-muted)] bg-indigo-50/50 dark:bg-indigo-950/50 p-2 rounded-md border border-indigo-100 dark:border-indigo-900/50">
+          <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: '#E24B4A' }}></span>
           {data.insights}
         </div>
       )}

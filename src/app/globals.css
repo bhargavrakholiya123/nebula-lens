@@ -69,6 +69,24 @@
   to { stroke-dashoffset: 0; }
 }
 
+@keyframes dash-flow {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes lateral-breach {
+  from { stroke-dashoffset: 18; }
+  to { stroke-dashoffset: 0; }
+}
+
+.gl-edge-path {
+  transition: stroke 0.15s ease-out, stroke-width 0.15s ease-out;
+}
+.gl-edge-path:hover, .gl-edge-path.selected {
+  stroke: rgba(255,255,255,0.4) !important;
+  stroke-width: 1.5px !important;
+}
+
 :root {
   /* LIGHT MODE TOKENS (from Repo B .light) */
   color-scheme: light;

@@ -21,6 +21,7 @@ export default function AnimatedEdge({
   label,
   markerEnd,
   data, // NEW: Added data prop to access our transferCost
+  selected, // Destructure selected state
 }: EdgeProps) {
   // 1. Hook into React Flow's internal state to watch node coordinates in real-time
   const sourceNode = useInternalNode(source);
@@ -106,34 +107,22 @@ export default function AnimatedEdge({
   // 6. DEFAULT STRUCTURAL STYLING: Parse the semantic telemetry context
   const lowerLabel = typeof label === 'string' ? label.toLowerCase() : '';
 
-  let strokeColor = '#cbd5e1';    // Default: Slate 300
-  let particleColor = '#94a3b8';    // Default: Slate 400
+  let strokeColor = 'rgba(255,255,255,0.15)'; // Default
+  let particleColor = '#94a3b8';
   let strokeDasharray: string | undefined = undefined;
-  let duration = '3s';              // Transmission latency
+  let duration = '3s';
   let particleRadius = 3;
-  let edgeWidth = 2;                // Default edge thickness
-  let glowColor = 'transparent';    // No glow in standard mode
+  let edgeWidth = 1; // Default edge thickness
+  let glowColor = 'transparent';
+  let animationClass = '';
 
-  if (lowerLabel.includes('post') || lowerLabel.includes('http') || lowerLabel.includes('api')) {
-    strokeColor = '#e2e8f0';
-    particleColor = '#06b6d4';
-    duration = '1.4s';
-    particleRadius = 3.5;
-  } else if (lowerLabel.includes('trigger') || lowerLabel.includes('event')) {
-    strokeColor = '#fed7aa';
-    particleColor = '#ea580c';
-    duration = '0.9s';
-    strokeDasharray = '4,4';
-  } else if (lowerLabel.includes('read') || lowerLabel.includes('write') || lowerLabel.includes('state')) {
-    strokeColor = '#dbeafe';
-    particleColor = '#2563eb';
-    duration = '2.4s';
-    particleRadius = 4;
-  } else if (lowerLabel.includes('store') || lowerLabel.includes('asset') || lowerLabel.includes('s3')) {
-    strokeColor = '#bbf7d0';
-    particleColor = '#16a34a';
-    duration = '4s';
-    strokeDasharray = '6,6';
+  // Data flow edges
+  if (lowerLabel.includes('post') || lowerLabel.includes('http') || lowerLabel.includes('api') || lowerLabel.includes('trigger') || lowerLabel.includes('event') || lowerLabel.includes('read') || lowerLabel.includes('write') || lowerLabel.includes('state') || lowerLabel.includes('store') || lowerLabel.includes('asset') || lowerLabel.includes('s3')) {
+    strokeColor = '#7C6FF7'; // Brand Accent
+    particleColor = '#7C6FF7';
+    edgeWidth = 1;
+    strokeDasharray = '6, 6';
+    animationClass = 'animate-[dash-flow_3s_linear_infinite]';
   }
 
 
@@ -199,19 +188,20 @@ export default function AnimatedEdge({
   if (isSecurityLens) {
     // KILL CHAIN: If a node is clicked, show the lateral movement paths
     if (selectedNodeId && isInsideBlastRadius) {
-      strokeColor = '#ef4444'; // Pure Red
+      strokeColor = '#E24B4A'; // Lateral movement / breach path
       particleColor = '#dc2626';
-      edgeWidth = 4;
-      glowColor = 'rgba(239, 68, 68, 0.6)';
-      strokeDasharray = '4,4';
+      edgeWidth = 2;
+      glowColor = 'rgba(226, 75, 74, 0.6)';
+      strokeDasharray = '6, 3';
       duration = '1s'; // Very fast attack propagation
+      animationClass = 'animate-[lateral-breach_0.8s_linear_infinite]';
     }
     // COMPLIANCE: Highlight statically vulnerable connections
     else if (!selectedNodeId && (vulnerableNodeIds.has(source) || vulnerableNodeIds.has(target))) {
-      strokeColor = '#f59e0b'; // Amber warning
-      particleColor = '#ef4444';
-      edgeWidth = 3;
-      glowColor = 'rgba(245, 158, 11, 0.4)';
+      strokeColor = '#BA7517'; // Amber warning
+      particleColor = '#f59e0b';
+      edgeWidth = 2;
+      glowColor = 'rgba(186, 117, 23, 0.4)';
       strokeDasharray = '4,4';
       duration = '1.5s';
     }
@@ -243,14 +233,14 @@ export default function AnimatedEdge({
         id={id}
         path={edgePath}
         markerEnd={`url(#arrow-${id})`}
+        className={`gl-edge-path ${selected ? 'selected' : ''} ${animationClass}`}
         style={{
           ...style,
           stroke: strokeColor,
           strokeWidth: edgeWidth, // 🚀 Dynamic Thickness
           strokeDasharray,
           opacity: currentOpacity,
-          filter: isCostLens ? `drop-shadow(0 0 8px ${glowColor})` : 'none', // 🚀 Neon Glow
-          transition: 'all 0.5s ease-in-out',
+          filter: isCostLens || glowColor !== 'transparent' ? `drop-shadow(0 0 8px ${glowColor})` : 'none', // 🚀 Neon Glow
         }}
       />
 

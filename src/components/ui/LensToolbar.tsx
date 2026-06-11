@@ -50,7 +50,7 @@ export default function LensToolbar() {
         transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.1 }}
       >
         {/* The Premium Glassmorphism Shell */}
-        <div data-tour-id="lens-toolbar" className="flex items-center gap-1 p-1.5 bg-white/60 dark:bg-[#111111]/80 backdrop-blur-2xl border border-white/60 dark:border-slate-800/50 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-full">
+        <div data-tour-id="lens-toolbar" className="flex items-center gap-1 p-1.5 bg-white/60 dark:bg-[#111111] backdrop-blur-2xl border border-white/60 dark:border-slate-800/50 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-full">
 
           {/* Lens Mapping Loop */}
           {lenses.map(({ id, label, icon: Icon }) => {

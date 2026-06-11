@@ -261,7 +261,7 @@ export default function ArchitectureCanvas() {
 
             {/* <Controls /> */}
 
-            <Panel position="top-left" data-tour-id="undo-redo-panel" className="bg-white/80 dark:bg-[#111111]/80 backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 dark:border-[#222222] flex gap-2">
+            <Panel position="top-left" data-tour-id="undo-redo-panel" className="bg-white/80 dark:bg-[#111111] backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 dark:border-[#222222] flex gap-2">
               <Button
                 variant="outline"
                 onClick={executeUndo}
