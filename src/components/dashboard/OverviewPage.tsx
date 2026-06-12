@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   HardDrives, CurrencyDollar, Warning,
@@ -163,6 +163,32 @@ export default function OverviewPage() {
   const [scanTime] = useState(() => new Date(Date.now() - 120000));
   const lastScanText = useRelativeTime(scanTime);
 
+  // Scan Button State
+  const [scanStatus, setScanStatus] = useState<"idle" | "scanning" | "done">("idle");
+  const [scanProgress, setScanProgress] = useState(0);
+
+  const handleScan = () => {
+    if (scanStatus !== "idle") return;
+    setScanStatus("scanning");
+    setScanProgress(0);
+
+    // TODO: Connect to real scan progress/websocket
+    let currentProgress = 0;
+    const intervalId = setInterval(() => {
+      currentProgress += 1;
+      setScanProgress(currentProgress);
+
+      if (currentProgress >= 12) {
+        clearInterval(intervalId);
+        setScanStatus("done");
+        setTimeout(() => {
+          setScanStatus("idle");
+          setScanProgress(0);
+        }, 800);
+      }
+    }, 150);
+  };
+
   const totalServices = MOCK_SERVICES.length;
   const monthlyCost = MOCK_SERVICES.reduce((acc, s) => acc + s.cost, 0);
   const openAlerts = MOCK_ALERTS.filter((a) => a.status === "open").length;
@@ -221,12 +247,70 @@ export default function OverviewPage() {
         </div>
 
         <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium bg-[rgba(99,102,241,0.12)] text-indigo-400 border border-[rgba(99,102,241,0.25)] hover:bg-[rgba(99,102,241,0.18)] transition-colors"
+          layout
+          disabled={scanStatus !== "idle"}
+          whileHover={scanStatus === "idle" ? { scale: 1.02 } : {}}
+          whileTap={scanStatus === "idle" ? { scale: 0.97 } : {}}
+          onClick={handleScan}
+          className="relative overflow-hidden flex items-center justify-center px-4 py-2 rounded-lg text-xs font-medium bg-[rgba(99,102,241,0.12)] text-indigo-400 border border-[rgba(99,102,241,0.25)] hover:bg-[rgba(99,102,241,0.18)] transition-colors min-w-[110px]"
         >
-          <ArrowsClockwise size={14} />
-          Scan Now
+          {scanStatus === "scanning" && (
+            <motion.div
+              className="absolute bottom-0 left-0 h-[2px] bg-indigo-400/40"
+              initial={{ width: "0%" }}
+              animate={{ width: `${(scanProgress / 12) * 100}%` }}
+              transition={{ ease: "linear", duration: 0.15 }}
+            />
+          )}
+          
+          <AnimatePresence mode="wait">
+            {scanStatus === "idle" && (
+              <motion.div 
+                key="idle"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center gap-2 whitespace-nowrap"
+              >
+                <ArrowsClockwise size={14} />
+                <span>Scan Now</span>
+              </motion.div>
+            )}
+            
+            {scanStatus === "scanning" && (
+              <motion.div 
+                key="scanning"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center gap-2 whitespace-nowrap"
+              >
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                >
+                  <ArrowsClockwise size={14} />
+                </motion.div>
+                <span className="tabular-nums">Scanning... {scanProgress}/12</span>
+              </motion.div>
+            )}
+
+            {scanStatus === "done" && (
+              <motion.div 
+                key="done"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center gap-2 whitespace-nowrap"
+              >
+                <CheckCircle size={14} />
+                <span>Done</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.button>
       </motion.div>
 
