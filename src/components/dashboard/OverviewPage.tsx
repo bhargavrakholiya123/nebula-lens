@@ -120,7 +120,7 @@ const RECENT_ACTIVITY = [
 
 /* ──────────────── Region Map (text-based) ──────────────── */
 const REGIONS = [
-  { name: "us-east-1",    label: "N. Virginia",   count: 10, color: "#6366F1" },
+  { name: "ap-south-a1",    label: "Mumbai",   count: 10, color: "#6366F1" },
   { name: "global",       label: "Global",         count: 2,  color: "#14B8A6" },
 ];
 
@@ -163,7 +163,7 @@ export default function OverviewPage() {
   const openAlerts      = MOCK_ALERTS.filter((a) => a.status === "open").length;
   const criticalAlerts  = MOCK_ALERTS.filter((a) => a.severity === "critical" && a.status === "open").length;
   const highAlerts      = MOCK_ALERTS.filter((a) => a.severity === "high" && a.status === "open").length;
-  
+
   const healthyCount    = MOCK_SERVICES.filter((s) => s.status === "healthy").length;
   const healthScore     = Math.round((healthyCount / totalServices) * 100);
   const currentSnap     = MOCK_SNAPSHOTS[MOCK_SNAPSHOTS.length - 1];
