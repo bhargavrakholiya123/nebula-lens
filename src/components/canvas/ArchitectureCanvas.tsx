@@ -262,8 +262,7 @@ export default function ArchitectureCanvas() {
           initial="initial"
           animate="animate"
           data-tour-id="canvas-viewport" 
-          className="absolute top-0 left-0 bottom-0 transition-all duration-[280ms] ease-in-out"
-          style={{ right: selectedNodeId || isInspectorPinned || isTourActive ? '360px' : '48px' }}
+          className="absolute top-0 left-0 right-0 bottom-0 transition-all duration-[280ms] ease-in-out"
         >
           <ReactFlow
             nodes={nodes}

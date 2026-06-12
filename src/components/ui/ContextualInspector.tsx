@@ -190,13 +190,13 @@ export default function ContextualInspector() {
   return (
     <div 
       data-tour-id="inspector-panel" 
-      className={`absolute top-0 right-0 h-full ${isExpanded ? 'w-[360px]' : 'w-12 cursor-pointer'} bg-white/80 dark:bg-[#111111] backdrop-blur-xl border-l border-slate-200 dark:border-slate-800 z-30 flex flex-col shadow-2xl transition-[width] duration-[280ms] ease-in-out overflow-hidden`}
+      className={`absolute top-6 right-6 max-h-[calc(100%-3rem)] h-auto ${isExpanded ? 'w-[360px]' : 'w-12 cursor-pointer'} bg-white/95 dark:bg-[#111111]/95 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl z-30 flex flex-col shadow-2xl transition-all duration-[280ms] ease-in-out overflow-hidden`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
     >
       {!isExpanded ? (
-        <div className="flex-1 w-full flex flex-col items-center py-6 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+        <div className="w-full flex flex-col items-center py-6 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
           <InfoIcon className="w-5 h-5 mb-6" />
           <div className="[writing-mode:vertical-lr] text-[11px] font-medium tracking-[0.7px] uppercase rotate-180 text-[var(--gl-text-muted)] whitespace-nowrap">
             GLOBAL OVERVIEW
@@ -208,7 +208,7 @@ export default function ContextualInspector() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { duration: 0.2, delay: 0.1 } }}
             exit={{ opacity: 0, transition: { duration: 0.1 } }}
-            className="flex flex-col h-full w-[360px]"
+            className="flex flex-col flex-1 min-h-0 w-[360px]"
           >
             {/* Header */}
             <div className="p-5 border-b bg-slate-50/50 dark:bg-[#111111] border-slate-200 dark:border-slate-800 flex justify-between items-start shrink-0">
