@@ -75,21 +75,13 @@ export default function ArchitectureCanvas() {
   useEffect(() => {
     // Wait for the DOM transition (280ms) to finish so React Flow calculates the center based on the final width constraints
     const timer = setTimeout(() => {
-      if (selectedNodeId) {
-        // If a node is selected, smoothly center it in the newly resized viewport
-        const node = getNode(selectedNodeId);
-        if (node) {
-          const x = node.position.x + (node.measured?.width || 200) / 2;
-          const y = node.position.y + (node.measured?.height || 100) / 2;
-          setCenter(x, y, { duration: 600, zoom: 1 });
-        }
-      } else if (nodes.length > 0) {
-        // If no node is selected but the layout changed (e.g., inspector pinned), fit the whole graph
+      if (nodes.length > 0) {
+        // When the layout changes (e.g., inspector pinned), fit the whole graph
         fitView({ padding: 0.2, duration: 600 });
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [selectedNodeId, isInspectorPinned, isTourActive, fitView, setCenter, getNode, nodes.length]);
+  }, [isInspectorPinned, isTourActive, fitView, nodes.length]);
 
 
 
