@@ -148,7 +148,7 @@ function toElkNode(
 
   const layoutOptions: Record<string, string> = isContainer
     ? {
-      'elk.padding': '[top=52,left=28,bottom=28,right=28]',
+      'elk.padding': '[top=52,left=48,bottom=48,right=48]',
       'elk.algorithm': 'layered',
       'elk.direction': 'RIGHT',
       'elk.spacing.nodeNode': '40',

@@ -28,7 +28,7 @@ export function useNodeDimensions(id: string) {
         // including borders, padding, and content
         const width = el.offsetWidth;
         const height = el.offsetHeight;
-        
+
         // Only trigger update if dimensions actually changed
         if (Math.abs(width - lastWidth) > 0.5 || Math.abs(height - lastHeight) > 0.5) {
           lastWidth = width;
