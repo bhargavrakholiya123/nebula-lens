@@ -211,11 +211,10 @@ export default function SettingsPage() {
 
               {statusMessage && (
                 <div
-                  className={`p-3.5 rounded-lg border text-xs font-medium ${
-                    statusMessage.isError
+                  className={`p-3.5 rounded-lg border text-xs font-medium ${statusMessage.isError
                       ? "bg-red-500/10 border-red-500/20 text-red-400"
                       : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                  }`}
+                    }`}
                 >
                   {statusMessage.text}
                 </div>
@@ -256,11 +255,10 @@ export default function SettingsPage() {
                       <span className="text-[10px] text-[var(--gl-text-muted)] font-mono">{acc.role_arn}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                        acc.status === "active"
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${acc.status === "active"
                           ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                           : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                      }`}>
+                        }`}>
                         {acc.status}
                       </span>
                       <span className="text-[10px] text-[var(--gl-text-muted)]">
@@ -269,11 +267,10 @@ export default function SettingsPage() {
                       <button
                         type="button"
                         onClick={() => handleSelectAccount(acc.id)}
-                        className={`px-3 py-1 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 ${
-                          selectedAccountId === acc.id
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 ${selectedAccountId === acc.id
                             ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 cursor-default"
                             : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm"
-                        }`}
+                          }`}
                         disabled={selectedAccountId === acc.id}
                       >
                         {selectedAccountId === acc.id ? "✓ Active" : "Select"}
@@ -422,11 +419,10 @@ export default function SettingsPage() {
             <div>
               {resetStatus && (
                 <div
-                  className={`p-3.5 mb-4 rounded-lg border text-xs font-medium ${
-                    resetStatus.isError
+                  className={`p-3.5 mb-4 rounded-lg border text-xs font-medium ${resetStatus.isError
                       ? "bg-red-500/10 border-red-500/20 text-red-400"
                       : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                  }`}
+                    }`}
                 >
                   {resetStatus.text}
                 </div>

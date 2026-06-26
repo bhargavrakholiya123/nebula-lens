@@ -225,6 +225,7 @@ export const useCanvasStore = create<CanvasState>()(
       }),
 
       fetchInfrastructure: async (snapshotId) => {
+        if (get().isLoading) return;
         set({ isLoading: true });
         try {
           const activeSnap = snapshotId !== undefined ? snapshotId : get().activeSnapshotId;

@@ -85,7 +85,7 @@ export default function ArchitectureCanvas() {
 
   const [mounted, setMounted] = useState(false);
   const [lensFlash, setLensFlash] = useState(false);
-  
+
   useEffect(() => {
     setMounted(true);
     // Initialize system layers on boot
@@ -324,7 +324,7 @@ export default function ArchitectureCanvas() {
 
   useEffect(() => {
     fetchInfrastructure();
-  }, [fetchInfrastructure]);
+  }, []);
 
   // Lens transition pulse
   const prevLensRef = useRef(activeLens);
@@ -414,7 +414,7 @@ export default function ArchitectureCanvas() {
                 Redo ↪
               </Button>
             </Panel>
-            
+
             {activeSnapshotId && (
               <Panel position="top-center" className="bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 dark:border-amber-500/50 text-amber-600 dark:text-amber-400 font-medium px-4 py-2 rounded-xl backdrop-blur-md flex items-center gap-3 shadow-lg z-[100] text-xs">
                 <span>Viewing Historical Version ({nodes.length} resources)</span>
@@ -482,9 +482,9 @@ export default function ArchitectureCanvas() {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.35, ease: 'easeOut' }}
                   className={`absolute inset-0 z-30 pointer-events-none rounded-none ${activeLens === 'blast-radius' ? 'bg-orange-500' :
-                      activeLens === 'cost' ? 'bg-emerald-500' :
-                        activeLens === 'security' ? 'bg-amber-500' :
-                          'bg-indigo-500'
+                    activeLens === 'cost' ? 'bg-emerald-500' :
+                      activeLens === 'security' ? 'bg-amber-500' :
+                        'bg-indigo-500'
                     }`}
                 />
               )}

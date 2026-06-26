@@ -51,13 +51,13 @@ export default function TimelinePage() {
   const [hoveredSlice, setHoveredSlice] = useState<number | null>(null);
   const [isInspectorOpen, setIsInspectorOpen] = useState(true);
 
-  const { 
-    fetchInfrastructure, 
-    setActiveSnapshotId, 
-    selectedAccountId, 
-    connectedAccounts 
+  const {
+    fetchInfrastructure,
+    setActiveSnapshotId,
+    selectedAccountId,
+    connectedAccounts
   } = useCanvasStore();
-  
+
   const { setActiveSection } = useDashboardStore();
 
   const fetchHistory = async () => {
@@ -208,7 +208,7 @@ export default function TimelinePage() {
       <div className="px-8 py-6 flex justify-between items-center gap-6 border-b border-[var(--gl-border)]/50 bg-[var(--gl-bg-panel)]/40 backdrop-blur-md shrink-0 relative overflow-hidden">
         {/* Glow Accent */}
         <div className="absolute top-0 left-1/4 w-96 h-24 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 blur-3xl rounded-full -translate-y-1/2 pointer-events-none" />
-        
+
         <div className="flex items-center gap-4 relative z-10">
           <div className="p-3 bg-gradient-to-br from-indigo-500/10 to-purple-500/5 border border-indigo-500/20 rounded-2xl text-indigo-400 shadow-inner">
             <Clock size={24} className="animate-pulse" />
@@ -242,11 +242,10 @@ export default function TimelinePage() {
 
       {/* Main Content Pane */}
       <div className="flex-1 relative overflow-hidden flex flex-row">
-        
+
         {/* Center Canvas / Timeline Carousel */}
-        <div className={`flex-1 overflow-y-auto p-8 flex flex-col justify-between gap-8 transition-all duration-500 ease-in-out ${
-          selectedVersion && isInspectorOpen ? "mr-[440px]" : "mr-0"
-        }`}>
+        <div className={`flex-1 overflow-y-auto p-8 flex flex-col justify-between gap-8 transition-all duration-500 ease-in-out ${selectedVersion && isInspectorOpen ? "mr-[440px]" : "mr-0"
+          }`}>
           {loadingHistory ? (
             <div className="flex flex-col items-center justify-center flex-1 min-h-[300px] gap-3 text-xs text-[var(--gl-text-muted)]">
               <ArrowsClockwise size={28} className="animate-spin text-indigo-500" />
@@ -265,18 +264,18 @@ export default function TimelinePage() {
             <div className="w-full flex flex-col flex-1 justify-center gap-8 py-4">
               {/* Premium Scale Motion Carousel */}
               <div className="w-full max-w-5xl mx-auto">
-                <MotionCarousel 
-                  versions={versions} 
-                  selectedIndex={selectedIndex >= 0 ? selectedIndex : 0} 
+                <MotionCarousel
+                  versions={versions}
+                  selectedIndex={selectedIndex >= 0 ? selectedIndex : 0}
                   onSelect={handleCarouselSelect}
                 />
               </div>
 
               {/* Management Control Center */}
               <div className="w-full">
-                <ManagementBar 
-                  currentIndex={selectedIndex >= 0 ? selectedIndex : 0} 
-                  totalIndex={versions.length} 
+                <ManagementBar
+                  currentIndex={selectedIndex >= 0 ? selectedIndex : 0}
+                  totalIndex={versions.length}
                   onPrev={handlePrev}
                   onNext={handleNext}
                   onDelete={handleDeleteSnapshot}
@@ -309,7 +308,7 @@ export default function TimelinePage() {
                     Scanned on {new Date(selectedVersion.created_at).toLocaleString()}
                   </p>
                 </div>
-                <button 
+                <button
                   onClick={() => setIsInspectorOpen(false)}
                   className="p-1.5 rounded-lg hover:bg-[var(--gl-bg-muted)] text-[var(--gl-text-muted)] hover:text-[var(--gl-text-primary)] transition-colors cursor-pointer"
                 >
@@ -321,21 +320,19 @@ export default function TimelinePage() {
               <div className="flex border-b border-[var(--gl-border)] px-6 bg-[var(--gl-bg-muted)]/30 shrink-0">
                 <button
                   onClick={() => setActiveTab("summary")}
-                  className={`py-3 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${
-                    activeTab === "summary"
+                  className={`py-3 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${activeTab === "summary"
                       ? "border-indigo-500 text-indigo-400"
                       : "border-transparent text-[var(--gl-text-muted)] hover:text-[var(--gl-text-secondary)]"
-                  }`}
+                    }`}
                 >
                   Summary
                 </button>
                 <button
                   onClick={() => setActiveTab("changes")}
-                  className={`py-3 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all flex items-center gap-1.5 ${
-                    activeTab === "changes"
+                  className={`py-3 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all flex items-center gap-1.5 ${activeTab === "changes"
                       ? "border-indigo-500 text-indigo-400"
                       : "border-transparent text-[var(--gl-text-muted)] hover:text-[var(--gl-text-secondary)]"
-                  }`}
+                    }`}
                 >
                   <GitFork size={14} />
                   Changes ({diffItems.length})
@@ -346,7 +343,7 @@ export default function TimelinePage() {
               <div className="flex-1 overflow-y-auto p-6">
                 {activeTab === "summary" && (
                   <div className="flex flex-col gap-6">
-                    
+
                     {/* Cost Summary Box */}
                     <div className="bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent border border-indigo-500/10 p-5 rounded-2xl flex justify-between items-center">
                       <div className="flex flex-col">
@@ -383,15 +380,14 @@ export default function TimelinePage() {
                                 <PieCenter prefix="$" />
                               </PieChart>
                             </div>
-                            
+
                             {/* Interactive Legend Grid */}
                             <div className="w-full px-4 mt-4 grid grid-cols-2 gap-2">
                               {pieChartData.map((slice, idx) => (
                                 <div
                                   key={slice.label}
-                                  className={`flex items-center gap-2 px-2 py-1 rounded transition-colors ${
-                                    hoveredSlice === idx ? 'bg-slate-200/50 dark:bg-slate-800/50' : ''
-                                  }`}
+                                  className={`flex items-center gap-2 px-2 py-1 rounded transition-colors ${hoveredSlice === idx ? 'bg-slate-200/50 dark:bg-slate-800/50' : ''
+                                    }`}
                                   onMouseEnter={() => setHoveredSlice(idx)}
                                   onMouseLeave={() => setHoveredSlice(null)}
                                 >
@@ -425,22 +421,20 @@ export default function TimelinePage() {
                         {diffItems.map((item, idx) => (
                           <div
                             key={item.id || `${item.resource_arn}-${idx}`}
-                            className={`p-3 rounded-xl border flex flex-col gap-1.5 ${
-                              item.change_type === "added"
+                            className={`p-3 rounded-xl border flex flex-col gap-1.5 ${item.change_type === "added"
                                 ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-400"
                                 : item.change_type === "removed"
-                                ? "bg-red-500/5 border-red-500/20 text-red-400"
-                                : "bg-amber-500/5 border-amber-500/20 text-amber-400"
-                            }`}
+                                  ? "bg-red-500/5 border-red-500/20 text-red-400"
+                                  : "bg-amber-500/5 border-amber-500/20 text-amber-400"
+                              }`}
                           >
                             <div className="flex justify-between items-center gap-3">
-                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider font-mono ${
-                                item.change_type === "added"
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider font-mono ${item.change_type === "added"
                                   ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
                                   : item.change_type === "removed"
-                                  ? "bg-red-500/10 border-red-500/20 text-red-400"
-                                  : "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                              }`}>
+                                    ? "bg-red-500/10 border-red-500/20 text-red-400"
+                                    : "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                                }`}>
                                 {item.change_type}
                               </span>
                               <span className="text-[9px] uppercase tracking-wider font-bold text-[var(--gl-text-muted)] flex items-center gap-1">
@@ -455,8 +449,8 @@ export default function TimelinePage() {
 
                             {item.change_details && (
                               <div className="text-[10px] text-[var(--gl-text-secondary)] font-sans border-t border-[var(--gl-border)]/20 pt-1.5 mt-0.5">
-                                {typeof item.change_details === "string" 
-                                  ? item.change_details 
+                                {typeof item.change_details === "string"
+                                  ? item.change_details
                                   : JSON.stringify(item.change_details)}
                               </div>
                             )}
