@@ -57,3 +57,6 @@ for (const file of files) {
   fs.writeFileSync(file, content);
 }
 console.log('Done nodes update!');
+
+
+
