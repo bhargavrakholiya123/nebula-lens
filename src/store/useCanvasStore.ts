@@ -34,6 +34,7 @@ type CanvasState = {
   fetchInfrastructure: (snapshotId?: string | null) => Promise<void>;
   activeSnapshotId: string | null;
   setActiveSnapshotId: (id: string | null) => void;
+  updateNodeDimensions: (id: string, width: number, height: number) => void;
 
   // AWS Account state
   selectedAccountId: string | null;
@@ -84,7 +85,49 @@ export const useCanvasStore = create<CanvasState>()(
       setActiveSnapshotId: (id) => set({ activeSnapshotId: id }),
 
       onNodesChange: (changes: NodeChange[]) => {
-        set({ nodes: applyNodeChanges(changes, get().nodes) as CloudNode[] });
+        let nextNodes = applyNodeChanges(changes, get().nodes) as CloudNode[];
+        
+        // Sync dynamic DOM resizing to explicit node.width/height so the MiniMap updates accurately
+        const hasDimensionChanges = changes.some(c => c.type === 'dimensions');
+        if (hasDimensionChanges) {
+          nextNodes = nextNodes.map(node => {
+            const dimChange = changes.find(c => c.type === 'dimensions' && c.id === node.id);
+            if (dimChange && dimChange.type === 'dimensions' && dimChange.dimensions) {
+              return {
+                ...node,
+                width: dimChange.dimensions.width,
+                height: dimChange.dimensions.height,
+                style: {
+                  ...(node.style || {}),
+                  width: dimChange.dimensions.width,
+                  height: dimChange.dimensions.height,
+                }
+              };
+            }
+            return node;
+          });
+        }
+        
+        set({ nodes: nextNodes });
+      },
+      updateNodeDimensions: (id: string, width: number, height: number) => {
+        set((state) => ({
+          nodes: state.nodes.map((node) => {
+            if (node.id === id) {
+              return {
+                ...node,
+                width,
+                height,
+                style: {
+                  ...(node.style || {}),
+                  width,
+                  height,
+                }
+              };
+            }
+            return node;
+          }),
+        }));
       },
       onEdgesChange: (changes: EdgeChange[]) => {
         set({ edges: applyEdgeChanges(changes, get().edges) as CloudEdge[] });
