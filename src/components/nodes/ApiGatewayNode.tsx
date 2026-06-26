@@ -77,6 +77,7 @@ function ApiGatewayNode({ id, data, selected, positionAbsoluteX }: { id: string;
             alt="Database"
             width={28}
             height={28}
+            priority
             className="object-contain drop-shadow-sm"
           />
         </div>
