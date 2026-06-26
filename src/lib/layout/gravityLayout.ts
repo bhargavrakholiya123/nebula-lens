@@ -399,7 +399,7 @@ function createSideDivider(
   return {
     id: '__unconnected-label__',
     type: 'default',
-    draggable: false,
+    draggable: true,
     selectable: false,
     focusable: false,
     position: {
@@ -570,7 +570,7 @@ export async function runGravityLayout(
         return {
           ...node,
           type: node.type ?? 'group',
-          draggable: false,
+          draggable: true,
           selectable: false,
           focusable: false,
         };
