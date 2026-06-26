@@ -108,7 +108,7 @@ function classifyNodes(
   const unconnected: Node[] = [];
 
   for (const node of nodes) {
-    const isContainer = hasChildren(node.id);
+    const isContainer = isContainerNode(node, childrenOf);
     const isConnected = edgeNodeIds.has(node.id);
     const hasConnectedChild = hasConnectedDescendant(node.id);
 
@@ -143,8 +143,8 @@ function toElkNode(
   const measuredW = (node as any).measured?.width;
   const measuredH = (node as any).measured?.height;
 
-  const width = measuredW ?? node.width ?? (isContainer ? DEFAULT_CONTAINER_W : DEFAULT_LEAF_W);
-  const height = measuredH ?? node.height ?? (isContainer ? DEFAULT_CONTAINER_H : DEFAULT_LEAF_H);
+  const leafWidth = measuredW ?? node.width ?? DEFAULT_LEAF_W;
+  const leafHeight = measuredH ?? node.height ?? DEFAULT_LEAF_H;
 
   const layoutOptions: Record<string, string> = isContainer
     ? {
@@ -156,13 +156,19 @@ function toElkNode(
     }
     : {};
 
-  return {
+  const elkNode: ELKNode = {
     id: nodeId,
-    width,
-    height,
     children,
     layoutOptions,
   };
+
+  // Only assign explicit dimensions to leaf nodes
+  if (!isContainer) {
+    elkNode.width = leafWidth;
+    elkNode.height = leafHeight;
+  }
+
+  return elkNode;
 }
 
 /**
@@ -327,6 +333,10 @@ function computeBoundingBox(nodes: Node[]): {
     maxY = -Infinity;
 
   for (const node of nodes) {
+    // Only evaluate absolute root nodes. Parent container nodes fully encapsulate their children.
+    const pid = (node as any).parentId ?? (node as any).parentNode;
+    if (pid) continue;
+
     const x = node.position?.x ?? 0;
     const y = node.position?.y ?? 0;
     const w = node.width ?? DEFAULT_LEAF_W;
@@ -339,10 +349,10 @@ function computeBoundingBox(nodes: Node[]): {
   }
 
   return {
-    x: minX,
-    y: minY,
-    width: maxX - minX,
-    height: maxY - minY,
+    x: minX === Infinity ? 0 : minX,
+    y: minY === Infinity ? 0 : minY,
+    width: maxX === -Infinity ? 800 : maxX - minX,
+    height: maxY === -Infinity ? 600 : maxY - minY,
   };
 }
 
@@ -488,7 +498,9 @@ export function emergencyGridFallback(nodes: Node[]): Node[] {
  * in the React Flow canvas (VPC, Subnet, AvailabilityZone, group).
  */
 export function isContainerNode(node: Node, childrenOf: Map<string, string[]>): boolean {
-  return (childrenOf.get(node.id) ?? []).length > 0;
+  const hasChild = (childrenOf.get(node.id) ?? []).length > 0;
+  const type = node.type?.toLowerCase() || '';
+  return hasChild || type === 'vpc' || type === 'subnet' || type === 'availabilityzone' || type === 'group';
 }
 
 // ─── Main export ──────────────────────────────────────────────────────────────
