@@ -18,16 +18,21 @@ export function useNodeDimensions(id: string) {
     if (!el) return;
 
     let rafId: number;
-    let lastWidth = 0;
-    let lastHeight = 0;
+    // Initialise to -1 so the very first observation always writes to the store,
+    // even when offsetWidth is 0 during the FOUC window in production.
+    let lastWidth = -1;
+    let lastHeight = -1;
 
     const observer = new ResizeObserver(() => {
       cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
-        // Use offsetWidth/offsetHeight to capture the true rendering footprint
-        // including borders, padding, and content
-        const width = el.offsetWidth;
-        const height = el.offsetHeight;
+        // Use getBoundingClientRect() instead of offsetWidth/offsetHeight.
+        // In production, CSS is loaded asynchronously; getBoundingClientRect()
+        // reads post-CSS layout dimensions inside a rAF, making it reliable
+        // even during the FOUC window where offsetWidth still returns 0.
+        const rect = el.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
 
         // Only trigger update if dimensions actually changed
         if (Math.abs(width - lastWidth) > 0.5 || Math.abs(height - lastHeight) > 0.5) {

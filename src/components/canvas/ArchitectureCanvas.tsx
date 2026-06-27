@@ -323,7 +323,16 @@ export default function ArchitectureCanvas() {
 
 
   useEffect(() => {
-    fetchInfrastructure();
+    // Gate the initial fetch behind document.fonts.ready.
+    // In production (Next.js), CSS and font chunks load asynchronously —
+    // container nodes paint at the wrong size until stylesheets apply.
+    // Waiting here ensures ResizeObserver has already written the correct
+    // boundary into the store before the first ELK layout pass runs.
+    const init = async () => {
+      await document.fonts.ready;
+      fetchInfrastructure();
+    };
+    init();
   }, []);
 
   // Lens transition pulse
