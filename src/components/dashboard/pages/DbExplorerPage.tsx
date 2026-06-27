@@ -247,6 +247,9 @@ export default function DbExplorerPage() {
                         <th className="p-4">Version</th>
                         <th className="p-4">Label</th>
                         <th className="p-4">Is Latest</th>
+                        <th className="p-4">Resources</th>
+                        <th className="p-4">Cost</th>
+                        <th className="p-4">Changes (+ / - / ~)</th>
                         <th className="p-4">Created At</th>
                       </>
                     )}
@@ -376,6 +379,15 @@ export default function DbExplorerPage() {
                             ) : (
                               <span className="text-[var(--gl-text-muted)] font-sans">No</span>
                             )}
+                          </td>
+                          <td className="p-4 font-sans font-bold">{row.total_resources ?? 0}</td>
+                          <td className="p-4 font-sans text-emerald-400 font-bold">${row.total_monthly_cost ? row.total_monthly_cost.toFixed(2) : "0.00"}</td>
+                          <td className="p-4 font-sans">
+                            <span className="text-emerald-400 font-bold">+{row.added_count ?? 0}</span>
+                            <span className="text-[var(--gl-text-muted)] mx-1">/</span>
+                            <span className="text-red-400 font-bold">-{row.removed_count ?? 0}</span>
+                            <span className="text-[var(--gl-text-muted)] mx-1">/</span>
+                            <span className="text-amber-400 font-bold">~{row.modified_count ?? 0}</span>
                           </td>
                           <td className="p-4 font-sans">{row.created_at ? new Date(row.created_at).toLocaleString() : "N/A"}</td>
                         </>
