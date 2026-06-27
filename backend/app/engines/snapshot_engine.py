@@ -81,6 +81,71 @@ class SnapshotEngine:
             )
             db.add(relationship)
 
+        # Calculate diff compared to last_snapshot if it exists
+        if last_snapshot:
+            # Fetch previous resources
+            prev_resources = db.query(Resource).filter(Resource.snapshot_id == last_snapshot.id).all()
+            prev_by_arn = {r.resource_arn: r for r in prev_resources}
+
+            # Fetch new resources
+            new_resources = db.query(Resource).filter(Resource.snapshot_id == snapshot.id).all()
+            new_by_arn = {r.resource_arn: r for r in new_resources}
+
+            # 1. Added
+            for arn, new_res in new_by_arn.items():
+                if arn not in prev_by_arn:
+                    diff = SnapshotDiff(
+                        from_snapshot=last_snapshot.id,
+                        to_snapshot=snapshot.id,
+                        change_type=ChangeType.added,
+                        resource_arn=arn,
+                        resource_type=new_res.node_type,
+                        change_details={"name": new_res.resource_name, "service": new_res.service}
+                    )
+                    db.add(diff)
+
+            # 2. Removed
+            for arn, prev_res in prev_by_arn.items():
+                if arn not in new_by_arn:
+                    diff = SnapshotDiff(
+                        from_snapshot=last_snapshot.id,
+                        to_snapshot=snapshot.id,
+                        change_type=ChangeType.removed,
+                        resource_arn=arn,
+                        resource_type=prev_res.node_type,
+                        change_details={"name": prev_res.resource_name, "service": prev_res.service}
+                    )
+                    db.add(diff)
+
+            # 3. Modified
+            for arn, new_res in new_by_arn.items():
+                if arn in prev_by_arn:
+                    prev_res = prev_by_arn[arn]
+                    if new_res.fingerprint != prev_res.fingerprint:
+                        details = {}
+                        if new_res.resource_name != prev_res.resource_name:
+                            details["name"] = {"from": prev_res.resource_name, "to": new_res.resource_name}
+                        
+                        prev_meta = prev_res.meta_data or {}
+                        new_meta = new_res.meta_data or {}
+                        meta_changes = {}
+                        for k, v in new_meta.items():
+                            if k not in ["metrics", "insights"]:
+                                if prev_meta.get(k) != v:
+                                    meta_changes[k] = {"from": prev_meta.get(k), "to": v}
+                        if meta_changes:
+                            details["meta_changes"] = meta_changes
+
+                        diff = SnapshotDiff(
+                            from_snapshot=last_snapshot.id,
+                            to_snapshot=snapshot.id,
+                            change_type=ChangeType.modified,
+                            resource_arn=arn,
+                            resource_type=new_res.node_type,
+                            change_details=details or {"message": "Resource configuration or metadata changed"}
+                        )
+                        db.add(diff)
+
         db.commit()
         db.refresh(snapshot)
 
