@@ -6,14 +6,11 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { scaleIn } from '../../lib/motion';
 import { useLensVisuals } from '../../hooks/useLensVisuals';
-import { useNodeDimensions } from '../../hooks/useNodeDimensions';
 import Icon from "../../../public/icons/aws-public-subnet.svg"
 function SubnetNode({ id, data, selected, positionAbsoluteX }: { id: string; data: any; selected?: boolean; positionAbsoluteX?: number }) {
   const { opacity, isHighlighted, isDimmed } = useLensVisuals(id);
-  const resizeRef = useNodeDimensions(id);
   return (
     <motion.div
-      ref={resizeRef}
       whileHover={{ 
         scale: 1.01,
         transition: { duration: 0.15, ease: "easeOut" }
