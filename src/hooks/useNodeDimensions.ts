@@ -26,13 +26,21 @@ export function useNodeDimensions(id: string) {
     const observer = new ResizeObserver(() => {
       cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
-        // Use getBoundingClientRect() instead of offsetWidth/offsetHeight.
-        // In production, CSS is loaded asynchronously; getBoundingClientRect()
-        // reads post-CSS layout dimensions inside a rAF, making it reliable
-        // even during the FOUC window where offsetWidth still returns 0.
-        const rect = el.getBoundingClientRect();
-        const width = rect.width;
-        const height = rect.height;
+        // Use offsetWidth/offsetHeight — these read CSS layout dimensions in
+        // unscaled pixels, unaffected by the React Flow canvas zoom transform.
+        //
+        // getBoundingClientRect() is NOT suitable here: React Flow renders nodes
+        // inside a CSS transform:scale(zoom) container, so getBoundingClientRect
+        // returns zoom-scaled viewport pixels. Writing those into node.width/height
+        // (which must be in unscaled canvas units) causes extent:parent clamping
+        // to use the wrong boundary and renders children outside their container.
+        const width = el.offsetWidth;
+        const height = el.offsetHeight;
+
+        // Skip zero-dimension reads that occur during the FOUC window in
+        // production before CSS chunks have been applied. The -1 sentinel
+        // (lastWidth) ensures the first non-zero read always writes to the store.
+        if (width === 0 || height === 0) return;
 
         // Only trigger update if dimensions actually changed
         if (Math.abs(width - lastWidth) > 0.5 || Math.abs(height - lastHeight) > 0.5) {
