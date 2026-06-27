@@ -590,9 +590,19 @@ export async function runGravityLayout(
       return node;
     };
 
+    // Strip any stale __unconnected-label__ node that survived a previous layout
+    // run in the store — createSideDivider() always appends a fresh one, so
+    // keeping the old one creates a duplicate-key crash in MiniMap (React key conflict).
+    const layoutedNodesCleaned = layoutedNodes.filter(
+      (n) => n.id !== '__unconnected-label__'
+    );
+    const unconnectedPositionedCleaned = unconnectedPositioned.filter(
+      (n) => n.id !== '__unconnected-label__'
+    );
+
     const allNodes: Node[] = [
-      ...layoutedNodes.map(applyContainerProps),
-      ...unconnectedPositioned,
+      ...layoutedNodesCleaned.map(applyContainerProps),
+      ...unconnectedPositionedCleaned,
       ...(divider ? [divider as Node] : []),
     ];
 
