@@ -78,7 +78,7 @@ export interface AutoLayoutResult {
   triggerLayout: (
     nodes: Node[],
     edges: Edge[],
-    options?: { force?: boolean; excludeCategories?: string[] }
+    options?: { force?: boolean; excludeCategories?: string[]; nodeDimensions?: Map<string, {width?: number; height?: number}> }
   ) => Promise<{ nodes: Node[]; depthMap: Map<string, number> } | null>;
 }
 
@@ -92,7 +92,7 @@ export function useAutoLayout(): AutoLayoutResult {
   const triggerLayout = useCallback(async (
     nodes: Node[],
     edges: Edge[],
-    options: { force?: boolean; excludeCategories?: string[] } = {}
+    options: { force?: boolean; excludeCategories?: string[]; nodeDimensions?: Map<string, {width?: number; height?: number}> } = {}
   ): Promise<{ nodes: Node[]; depthMap: Map<string, number> } | null> => {
     // Guard: don't stack concurrent layout runs
     if (runningRef.current) return null;
@@ -109,7 +109,7 @@ export function useAutoLayout(): AutoLayoutResult {
     setIsLayouting(true);
 
     try {
-      const result = await runGravityLayout(nodes, edges);
+      const result = await runGravityLayout(nodes, edges, options.nodeDimensions);
       lastHashRef.current = hash;
 
       // Compute depth map on the *original* nodes (parentId relationships

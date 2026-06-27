@@ -131,20 +131,19 @@ function toElkNode(
   nodeId: string,
   nodeIndex: Map<string, Node>,
   childrenOf: Map<string, string[]>,
+  nodeDimensions?: Map<string, { width?: number; height?: number }>,
 ): ELKNode {
   const node = nodeIndex.get(nodeId)!;
   const childIds = childrenOf.get(nodeId) ?? [];
   const children = childIds.map((cid) =>
-    toElkNode(cid, nodeIndex, childrenOf),
+    toElkNode(cid, nodeIndex, childrenOf, nodeDimensions),
   );
   const isContainer = children.length > 0;
 
-  // Use measured dimensions when available (React Flow v12 sets node.measured)
-  const measuredW = (node as any).measured?.width;
-  const measuredH = (node as any).measured?.height;
+  const measured = nodeDimensions?.get(nodeId);
 
-  const leafWidth = measuredW ?? node.width ?? DEFAULT_LEAF_W;
-  const leafHeight = measuredH ?? node.height ?? DEFAULT_LEAF_H;
+  const leafWidth = measured?.width ?? (node as any).measured?.width ?? node.width ?? DEFAULT_LEAF_W;
+  const leafHeight = measured?.height ?? (node as any).measured?.height ?? node.height ?? DEFAULT_LEAF_H;
 
   const layoutOptions: Record<string, string> = isContainer
     ? {
@@ -180,6 +179,7 @@ function buildElkGraph(
   structuralEdges: Edge[],
   nodeIndex: Map<string, Node>,
   childrenOf: Map<string, string[]>,
+  nodeDimensions?: Map<string, { width?: number; height?: number }>,
 ): ELKNode {
   const elkNodeIds = new Set(elkNodes.map((n) => n.id));
 
@@ -190,7 +190,7 @@ function buildElkGraph(
       const pid = (n as any).parentId ?? (n as any).parentNode;
       return !pid || !elkNodeIds.has(pid);
     })
-    .map((n) => toElkNode(n.id, nodeIndex, childrenOf));
+    .map((n) => toElkNode(n.id, nodeIndex, childrenOf, nodeDimensions));
 
   // 2.2 Edges — both endpoints must be in the elk bucket
   const elkEdges = structuralEdges
@@ -430,6 +430,36 @@ function createSideDivider(
   };
 }
 
+// ─── Pre/Post Layout opacity and scatter ──────────────────────────────────────
+
+export function setInitialScatterPositions(nodes: Node[]): Node[] {
+  const NODE_W = 185;
+  const NODE_H = 85;
+  const COLS = Math.ceil(Math.sqrt(nodes.length * 1.6));
+  const GAP = 60;
+
+  return nodes.map((node, i) => ({
+    ...node,
+    position: node.position?.x !== 0 || node.position?.y !== 0
+      ? node.position
+      : {
+          x: (i % COLS) * (NODE_W + GAP),
+          y: Math.floor(i / COLS) * (NODE_H + GAP),
+        },
+    style: {
+      ...node.style,
+      opacity: 0,
+    },
+  }));
+}
+
+export function restoreOpacity(nodes: Node[]): Node[] {
+  return nodes.map(n => ({
+    ...n,
+    style: { ...n.style, opacity: 1 },
+  }));
+}
+
 // ─── Phase 6 — Sort + compose ─────────────────────────────────────────────────
 
 /**
@@ -520,12 +550,13 @@ export function isContainerNode(node: Node, childrenOf: Map<string, string[]>): 
 export async function runGravityLayout(
   nodes: Node[],
   edges: Edge[],
+  nodeDimensions?: Map<string, { width?: number; height?: number }>,
 ): Promise<{ nodes: Node[]; edges: Edge[] }> {
   // Trivial cases
   if (nodes.length === 0) return { nodes, edges };
   if (nodes.length === 1) {
     return {
-      nodes: [{ ...nodes[0], position: { x: 0, y: 0 } }],
+      nodes: restoreOpacity([{ ...nodes[0], position: { x: 0, y: 0 } }]),
       edges,
     };
   }
@@ -558,6 +589,7 @@ export async function runGravityLayout(
       structuralEdges,
       nodeIndex,
       childrenOf,
+      nodeDimensions,
     );
 
     // ── Phase 3 ────────────────────────────────────────────────────────────────
@@ -606,7 +638,8 @@ export async function runGravityLayout(
       ...(divider ? [divider as Node] : []),
     ];
 
-    const sorted = sortByParentFirst(allNodes);
+    const withOpacity = restoreOpacity(allNodes);
+    const sorted = sortByParentFirst(withOpacity);
 
     return { nodes: sorted, edges };
   } catch (err) {

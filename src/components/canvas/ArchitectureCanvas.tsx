@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useCallback, useRef, useState } from 'react';
+import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ReactFlow, Background, Controls, Panel, MiniMap, useReactFlow } from '@xyflow/react';
+import { ReactFlow, Background, Controls, Panel, MiniMap, useReactFlow, useNodesInitialized, useStore as useReactFlowStore } from '@xyflow/react';
 import { useStore } from 'zustand';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useAutoLayout } from '../../lib/layout/useAutoLayout';
@@ -237,8 +237,29 @@ export default function ArchitectureCanvas() {
 
   // ── Auto Layout ───────────────────────────────────────────────────────────
   const { isLayouting, triggerLayout } = useAutoLayout();
+  
+  // If nodes are already visible (opacity === 1), they have been laid out previously.
+  const needsInitialLayout = nodes.length > 0 && nodes.some(n => n.style?.opacity === 0);
+  const [layoutState, setLayoutState] = useState<'idle' | 'measuring' | 'layouting' | 'done'>(
+    nodes.length > 0 && !needsInitialLayout ? 'done' : 'idle'
+  );
 
-  const executeAutoLayout = useCallback(async (opts?: { force?: boolean }) => {
+  const nodesInitialized = useNodesInitialized({
+    includeHiddenNodes: false,
+  });
+
+  const nodeLookup = useReactFlowStore(state => state.nodeLookup);
+  const nodeDimensions = useMemo(() => {
+    return new Map(
+      nodeLookup
+        ? [...nodeLookup.entries()].map(
+            ([id, n]) => [id, { width: (n as any).measured?.width ?? n.width, height: (n as any).measured?.height ?? n.height }]
+          )
+        : []
+    );
+  }, [nodeLookup]);
+
+  const executeAutoLayout = useCallback(async (opts?: { force?: boolean, isFirstLoad?: boolean, nodeDimensions?: Map<string, {width?: number, height?: number}> }) => {
     const currentNodes = useCanvasStore.getState().nodes;
     const currentEdges = useCanvasStore.getState().edges;
 
@@ -247,11 +268,18 @@ export default function ArchitectureCanvas() {
       currentNodes.map((n) => [n.id, { x: n.position.x, y: n.position.y }])
     );
 
-    const layoutOpts = { ...opts, excludeCategories: ['iam_permission'] };
+    const layoutOpts = { ...opts, excludeCategories: ['iam_permission'], nodeDimensions: opts?.nodeDimensions };
     const result = await triggerLayout(currentNodes, currentEdges, layoutOpts);
     if (!result) return; // skipped (no change) or failed
 
     const { nodes: layoutedNodes, depthMap } = result;
+
+    if (opts?.isFirstLoad) {
+      useCanvasStore.setState({ nodes: layoutedNodes as any });
+      // Small timeout to allow nodes to mount before fitView
+      setTimeout(() => fitView({ padding: 0.15, duration: 0 }), 50);
+      return;
+    }
 
     // Build depth-stagger delay map: 30ms per depth level
     // depth 0 (VPC)            → 0ms delay
@@ -281,6 +309,34 @@ export default function ArchitectureCanvas() {
       () => setTimeout(() => fitView({ duration: 500, padding: 0.15 }), 300)
     );
   }, [triggerLayout, animateTransition, fitView]);
+
+  // Handle first load sequence
+  useEffect(() => {
+    if (nodes.length > 0 && layoutState === 'idle') {
+      const needsInitialLayout = nodes.some(n => n.style?.opacity === 0);
+      if (needsInitialLayout) {
+        setLayoutState('measuring');
+      } else {
+        setLayoutState('done');
+      }
+    } else if (nodes.length === 0 && layoutState !== 'idle') {
+      setLayoutState('idle');
+    }
+  }, [nodes.length, layoutState, nodes]);
+
+  useEffect(() => {
+    if (!nodesInitialized) return;
+    if (layoutState !== 'measuring') return;
+
+    setLayoutState('layouting');
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(async () => {
+        await executeAutoLayout({ force: true, isFirstLoad: true, nodeDimensions });
+        setLayoutState('done');
+      });
+    });
+  }, [nodesInitialized, layoutState, executeAutoLayout, nodeDimensions]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -348,7 +404,15 @@ export default function ArchitectureCanvas() {
 
       {/* 3. Wrap React Flow in a flex-1 container so it fills the remaining height */}
       <div className="flex-1 flex flex-row w-full h-full relative overflow-hidden">
-
+        
+        {nodes.length > 0 && layoutState !== 'done' && (
+          <div className="absolute inset-0 bg-[var(--gl-bg-base)] flex flex-col items-center justify-center z-50 text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin dark:border-slate-600 dark:border-t-slate-300" />
+              {layoutState === 'measuring' ? 'Measuring architecture...' : 'Applying layout...'}
+            </div>
+          </div>
+        )}
 
         <motion.div
           variants={{

@@ -242,12 +242,14 @@ export const useCanvasStore = create<CanvasState>()(
 
           // ADDON: Validate parent references and purge ghost groups before setting state
           const { validateParentRefs, purgeGhostGroups, normalizeEdges } = await import('../lib/layout/nodeUtils');
+          const { setInitialScatterPositions, sortByParentFirst } = await import('../lib/layout/gravityLayout');
           const safeNodes = validateParentRefs(data.nodes);
           const cleanNodes = purgeGhostGroups(safeNodes, data.edges);
           const cleanEdges = normalizeEdges(data.edges);
+          const scattered = setInitialScatterPositions(cleanNodes);
 
           set({
-            nodes: cleanNodes as CloudNode[],
+            nodes: sortByParentFirst(scattered) as CloudNode[],
             edges: cleanEdges as CloudEdge[],
             isLoading: false
           });
