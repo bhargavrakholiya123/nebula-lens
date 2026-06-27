@@ -22,6 +22,19 @@ interface DbStats {
 
 type TableTab = "accounts" | "snapshots" | "nodes" | "edges" | "resources" | "relationships" | "jobs" | "users" | "service_scans" | "snapshot_diffs";
 
+const tableDescriptions: Record<TableTab, string> = {
+  accounts: "Stores scanned cloud provider (AWS) credentials and account connection configurations.",
+  snapshots: "Stores version/scans history including pre-calculated resource counts, running cost, and change statistics.",
+  nodes: "Stores normalized resources mapped for the active topology graph canvas layout.",
+  edges: "Stores normalized network/communication lines between canvas nodes.",
+  resources: "Stores raw undiscovered scanner items from the cloud engine.",
+  relationships: "Stores raw undiscovered connections from the scanner engine.",
+  jobs: "Tracks AWS background scanner job status (pending, running, success, failed).",
+  users: "Stores Auth0 account identities and settings.",
+  service_scans: "Tracks region-by-service scan chunks (e.g. EC2 in us-east-1).",
+  snapshot_diffs: "Stores calculated additions, removals, and modifications between versions."
+};
+
 export default function DbExplorerPage() {
   const [stats, setStats] = useState<DbStats | null>(null);
   const [activeTab, setActiveTab] = useState<TableTab>("accounts");
@@ -216,6 +229,13 @@ export default function DbExplorerPage() {
 
         {/* Table View */}
         <div className="bg-[var(--gl-bg-panel)] border border-[var(--gl-border)] rounded-xl overflow-hidden shadow-sm">
+          {/* Table Description Bar */}
+          <div className="px-6 py-3 bg-[var(--gl-bg-muted)]/40 border-b border-[var(--gl-border)]/50 text-[11px] text-[var(--gl-text-secondary)] font-medium flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+            <span className="font-bold uppercase tracking-wider text-[10px] text-indigo-400 mr-1">{activeTab}:</span>
+            {tableDescriptions[activeTab]}
+          </div>
+
           {loadingTable ? (
             <div className="p-12 text-center text-xs text-[var(--gl-text-muted)] flex flex-col items-center justify-center gap-3">
               <ArrowsClockwise size={24} className="animate-spin text-blue-500" />
