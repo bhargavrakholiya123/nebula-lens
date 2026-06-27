@@ -4,6 +4,7 @@ from app.models.models import (
     Snapshot, Resource, Relationship,
     SnapshotDiff, ChangeType, AwsAccount
 )
+from app.engines.cost_engine import cost_engine
 from uuid import UUID
 
 logger = logging.getLogger(__name__)
@@ -37,12 +38,44 @@ class SnapshotEngine:
             Snapshot.is_latest == True
         ).update({"is_latest": False})
 
-        # Create new snapshot
+        # Calculate costs for the new nodes
+        nodes_dicts = []
+        for nr in all_nodes:
+            n = nr['node']
+            nodes_dicts.append({
+                "id": n['id'],
+                "type": n['type'],
+                "parentId": n.get('parentID') or n.get('parentId'),
+                "position": n.get('position', {"x": 0, "y": 0}),
+                "data": {
+                    "name": nr.get('resource_name', ''),
+                    "service": n['data']['service'],
+                    "region": n['data']['region'],
+                    "account_id": aws_account_id,
+                    "resource_arn": nr['resource_arn'],
+                    "insights": n['data'].get('insights', ''),
+                    "metrics": n['data'].get('metrics', {}),
+                    "tags": n['data'].get('tags', {})
+                }
+            })
+
+        cost_results = cost_engine.calculate_all(nodes_dicts, {})
+        total_monthly_cost = cost_engine.total_cost(cost_results)
+
+        cost_summary = {}
+        for cr in cost_results.values():
+            svc = cr.get("service", "unknown")
+            cost_summary[svc] = round(cost_summary.get(svc, 0.0) + cr.get("monthlyCost", 0.0), 2)
+
+        # Create new snapshot with pre-calculated stats
         snapshot = Snapshot(
             account_id=account_db_id,
             version_number=version_number,
             label=f"Version {version_number}",
-            is_latest=True
+            is_latest=True,
+            total_resources=len(all_nodes),
+            total_monthly_cost=total_monthly_cost,
+            cost_by_service=cost_summary
         )
         db.add(snapshot)
         db.flush()  # Get snapshot.id without full commit
@@ -91,6 +124,19 @@ class SnapshotEngine:
             new_resources = db.query(Resource).filter(Resource.snapshot_id == snapshot.id).all()
             new_by_arn = {r.resource_arn: r for r in new_resources}
 
+        # Calculate diff compared to last_snapshot if it exists
+        added_count = 0
+        removed_count = 0
+        modified_count = 0
+        if last_snapshot:
+            # Fetch previous resources
+            prev_resources = db.query(Resource).filter(Resource.snapshot_id == last_snapshot.id).all()
+            prev_by_arn = {r.resource_arn: r for r in prev_resources}
+
+            # Fetch new resources
+            new_resources = db.query(Resource).filter(Resource.snapshot_id == snapshot.id).all()
+            new_by_arn = {r.resource_arn: r for r in new_resources}
+
             # 1. Added
             for arn, new_res in new_by_arn.items():
                 if arn not in prev_by_arn:
@@ -103,6 +149,7 @@ class SnapshotEngine:
                         change_details={"name": new_res.resource_name, "service": new_res.service}
                     )
                     db.add(diff)
+                    added_count += 1
 
             # 2. Removed
             for arn, prev_res in prev_by_arn.items():
@@ -116,6 +163,7 @@ class SnapshotEngine:
                         change_details={"name": prev_res.resource_name, "service": prev_res.service}
                     )
                     db.add(diff)
+                    removed_count += 1
 
             # 3. Modified
             for arn, new_res in new_by_arn.items():
@@ -145,6 +193,12 @@ class SnapshotEngine:
                             change_details=details or {"message": "Resource configuration or metadata changed"}
                         )
                         db.add(diff)
+                        modified_count += 1
+
+        # Store stats on the snapshot row
+        snapshot.added_count = added_count
+        snapshot.removed_count = removed_count
+        snapshot.modified_count = modified_count
 
         db.commit()
         db.refresh(snapshot)
