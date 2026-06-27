@@ -17,6 +17,13 @@ router = APIRouter(prefix="/api/history", tags=["History"])
 # Process-level cache for snapshot stats to prevent redundant calculations
 HISTORY_STATS_CACHE = {}
 
+# Supported service types to filter out unsupported raw resources in fallbacks
+SUPPORTED_SERVICES = [
+    "vpc", "subnet", "ec2", "lambda", "rds", "sqs", "s3",
+    "apigateway", "eventbridge", "dynamodb", "ecs", "sns", "cloudfront",
+    "eks", "secretsmanager", "stepfunctions"
+]
+
 
 # Helper to convert NormalizedNode to the dict format expected by cost_engine and React Flow
 def row_to_node_dict(row: NormalizedNode) -> Dict[str, Any]:
@@ -131,7 +138,10 @@ def get_snapshot_history(account_id: Optional[str] = None, db: Session = Depends
             if nodes_rows:
                 nodes_dicts = [row_to_node_dict(n) for n in nodes_rows]
             else:
-                resource_rows = db.query(Resource).filter(Resource.snapshot_id == snap.id).all()
+                resource_rows = db.query(Resource).filter(
+                    Resource.snapshot_id == snap.id,
+                    Resource.service.in_(SUPPORTED_SERVICES)
+                ).all()
                 nodes_dicts = [resource_row_to_node_dict(r) for r in resource_rows]
             
             # Run offline cost calculation using fallback prices
@@ -220,7 +230,10 @@ def get_snapshot_graph(snapshot_id: str, db: Session = Depends(get_db)):
     if nodes_rows:
         nodes_dicts = [row_to_node_dict(n) for n in nodes_rows]
     else:
-        resource_rows = db.query(Resource).filter(Resource.snapshot_id == snapshot.id).all()
+        resource_rows = db.query(Resource).filter(
+            Resource.snapshot_id == snapshot.id,
+            Resource.service.in_(SUPPORTED_SERVICES)
+        ).all()
         nodes_dicts = [resource_row_to_node_dict(r) for r in resource_rows]
 
     # Fetch edges
@@ -311,10 +324,16 @@ def get_snapshot_diff(snapshot_id: str, db: Session = Depends(get_db)):
 
             if previous_snap:
                 # Fetch resources
-                prev_resources = db.query(Resource).filter(Resource.snapshot_id == previous_snap.id).all()
+                prev_resources = db.query(Resource).filter(
+                    Resource.snapshot_id == previous_snap.id,
+                    Resource.service.in_(SUPPORTED_SERVICES)
+                ).all()
                 prev_by_arn = {r.resource_arn: r for r in prev_resources}
 
-                new_resources = db.query(Resource).filter(Resource.snapshot_id == current_snap.id).all()
+                new_resources = db.query(Resource).filter(
+                    Resource.snapshot_id == current_snap.id,
+                    Resource.service.in_(SUPPORTED_SERVICES)
+                ).all()
                 new_by_arn = {r.resource_arn: r for r in new_resources}
 
                 # 1. Added resources

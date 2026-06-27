@@ -114,15 +114,12 @@ class SnapshotEngine:
             )
             db.add(relationship)
 
-        # Calculate diff compared to last_snapshot if it exists
-        if last_snapshot:
-            # Fetch previous resources
-            prev_resources = db.query(Resource).filter(Resource.snapshot_id == last_snapshot.id).all()
-            prev_by_arn = {r.resource_arn: r for r in prev_resources}
-
-            # Fetch new resources
-            new_resources = db.query(Resource).filter(Resource.snapshot_id == snapshot.id).all()
-            new_by_arn = {r.resource_arn: r for r in new_resources}
+        # Supported services to filter out raw/unsupported items in diffs
+        SUPPORTED_SERVICES = [
+            "vpc", "subnet", "ec2", "lambda", "rds", "sqs", "s3",
+            "apigateway", "eventbridge", "dynamodb", "ecs", "sns", "cloudfront",
+            "eks", "secretsmanager", "stepfunctions"
+        ]
 
         # Calculate diff compared to last_snapshot if it exists
         added_count = 0
@@ -130,11 +127,17 @@ class SnapshotEngine:
         modified_count = 0
         if last_snapshot:
             # Fetch previous resources
-            prev_resources = db.query(Resource).filter(Resource.snapshot_id == last_snapshot.id).all()
+            prev_resources = db.query(Resource).filter(
+                Resource.snapshot_id == last_snapshot.id,
+                Resource.service.in_(SUPPORTED_SERVICES)
+            ).all()
             prev_by_arn = {r.resource_arn: r for r in prev_resources}
 
             # Fetch new resources
-            new_resources = db.query(Resource).filter(Resource.snapshot_id == snapshot.id).all()
+            new_resources = db.query(Resource).filter(
+                Resource.snapshot_id == snapshot.id,
+                Resource.service.in_(SUPPORTED_SERVICES)
+            ).all()
             new_by_arn = {r.resource_arn: r for r in new_resources}
 
             # 1. Added
