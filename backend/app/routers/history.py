@@ -262,6 +262,7 @@ def get_snapshot_graph(snapshot_id: str, db: Session = Depends(get_db)):
 def get_snapshot_diff(snapshot_id: str, db: Session = Depends(get_db)):
     """
     Returns the diff details (added/removed/modified resources) for a snapshot.
+    If no pre-calculated diff exists, it is calculated on-the-fly and committed.
     """
     try:
         snap_uuid = UUIDClass(snapshot_id)
@@ -273,14 +274,116 @@ def get_snapshot_diff(snapshot_id: str, db: Session = Depends(get_db)):
     ).all()
 
     results = []
-    for d in diffs:
-        results.append({
-            "id": str(d.id),
-            "change_type": d.change_type,
-            "resource_arn": d.resource_arn,
-            "resource_type": d.resource_type,
-            "change_details": d.change_details
-        })
+    if diffs:
+        for d in diffs:
+            results.append({
+                "id": str(d.id),
+                "change_type": d.change_type,
+                "resource_arn": d.resource_arn,
+                "resource_type": d.resource_type,
+                "change_details": d.change_details
+            })
+    else:
+        # Calculate diffs on-the-fly for older or newly scanned snapshots
+        current_snap = db.query(Snapshot).filter(Snapshot.id == snap_uuid).first()
+        if current_snap:
+            # Find previous snapshot for this account
+            previous_snap = db.query(Snapshot).filter(
+                Snapshot.account_id == current_snap.account_id,
+                Snapshot.version_number < current_snap.version_number
+            ).order_by(Snapshot.version_number.desc()).first()
+
+            if previous_snap:
+                # Fetch resources
+                prev_resources = db.query(Resource).filter(Resource.snapshot_id == previous_snap.id).all()
+                prev_by_arn = {r.resource_arn: r for r in prev_resources}
+
+                new_resources = db.query(Resource).filter(Resource.snapshot_id == current_snap.id).all()
+                new_by_arn = {r.resource_arn: r for r in new_resources}
+
+                # 1. Added resources
+                for arn, new_res in new_by_arn.items():
+                    if arn not in prev_by_arn:
+                        diff = SnapshotDiff(
+                            from_snapshot=previous_snap.id,
+                            to_snapshot=current_snap.id,
+                            change_type=ChangeType.added,
+                            resource_arn=arn,
+                            resource_type=new_res.node_type,
+                            change_details={"name": new_res.resource_name, "service": new_res.service}
+                        )
+                        db.add(diff)
+                        db.flush()
+                        results.append({
+                            "id": str(diff.id),
+                            "change_type": diff.change_type,
+                            "resource_arn": diff.resource_arn,
+                            "resource_type": diff.resource_type,
+                            "change_details": diff.change_details
+                        })
+
+                # 2. Removed resources
+                for arn, prev_res in prev_by_arn.items():
+                    if arn not in new_by_arn:
+                        diff = SnapshotDiff(
+                            from_snapshot=previous_snap.id,
+                            to_snapshot=current_snap.id,
+                            change_type=ChangeType.removed,
+                            resource_arn=arn,
+                            resource_type=prev_res.node_type,
+                            change_details={"name": prev_res.resource_name, "service": prev_res.service}
+                        )
+                        db.add(diff)
+                        db.flush()
+                        results.append({
+                            "id": str(diff.id),
+                            "change_type": diff.change_type,
+                            "resource_arn": diff.resource_arn,
+                            "resource_type": diff.resource_type,
+                            "change_details": diff.change_details
+                        })
+
+                # 3. Modified resources
+                for arn, new_res in new_by_arn.items():
+                    if arn in prev_by_arn:
+                        prev_res = prev_by_arn[arn]
+                        if new_res.fingerprint != prev_res.fingerprint:
+                            details = {}
+                            if new_res.resource_name != prev_res.resource_name:
+                                details["name"] = {"from": prev_res.resource_name, "to": new_res.resource_name}
+                            
+                            prev_meta = prev_res.meta_data or {}
+                            new_meta = new_res.meta_data or {}
+                            meta_changes = {}
+                            for k, v in new_meta.items():
+                                if k not in ["metrics", "insights"]:
+                                    if prev_meta.get(k) != v:
+                                        meta_changes[k] = {"from": prev_meta.get(k), "to": v}
+                            if meta_changes:
+                                details["meta_changes"] = meta_changes
+
+                            diff = SnapshotDiff(
+                                from_snapshot=previous_snap.id,
+                                to_snapshot=current_snap.id,
+                                change_type=ChangeType.modified,
+                                resource_arn=arn,
+                                resource_type=new_res.node_type,
+                                change_details=details or {"message": "Resource configuration or metadata changed"}
+                            )
+                            db.add(diff)
+                            db.flush()
+                            results.append({
+                                "id": str(diff.id),
+                                "change_type": diff.change_type,
+                                "resource_arn": diff.resource_arn,
+                                "resource_type": diff.resource_type,
+                                "change_details": diff.change_details
+                            })
+                
+                db.commit()
+                # Clear the cache for the current snapshot so stats (like added, removed counts) are recalculated on next load
+                if str(current_snap.id) in HISTORY_STATS_CACHE:
+                    del HISTORY_STATS_CACHE[str(current_snap.id)]
 
     return {
         "snapshot_id": snapshot_id,
