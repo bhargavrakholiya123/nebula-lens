@@ -100,18 +100,29 @@ def get_snapshot_history(account_id: Optional[str] = None, db: Session = Depends
         for snap in snapshots:
             snap_id_str = str(snap.id)
 
-            # Check cache first to avoid heavy cost calculations on every load
-            if snap_id_str in HISTORY_STATS_CACHE:
-                cached_data = HISTORY_STATS_CACHE[snap_id_str]
+            # If the database columns are already populated, use them directly (dedicated table pattern)
+            if snap.total_resources is not None and snap.total_monthly_cost is not None and snap.cost_by_service is not None:
+                added = snap.added_count or 0
+                removed = snap.removed_count or 0
+                modified = snap.modified_count or 0
                 versions_data.append({
                     "version_id": snap_id_str,
                     "version_number": snap.version_number,
                     "label": snap.label or f"Version {snap.version_number}",
                     "is_latest": snap.is_latest,
                     "created_at": snap.created_at.isoformat() if snap.created_at else None,
-                    "summary": cached_data["summary"],
-                    "costs": cached_data["costs"],
-                    "changes": cached_data["changes"]
+                    "summary": {
+                        "total_resources": snap.total_resources,
+                    },
+                    "costs": {
+                        "total_monthly": snap.total_monthly_cost,
+                        "by_service": snap.cost_by_service
+                    },
+                    "changes": {
+                        "added": added,
+                        "removed": removed,
+                        "modified": modified
+                    }
                 })
                 continue
 
@@ -149,22 +160,16 @@ def get_snapshot_history(account_id: Optional[str] = None, db: Session = Depends
                 SnapshotDiff.change_type == ChangeType.modified
             ).count()
 
-            stats = {
-                "summary": {
-                    "total_resources": len(nodes_dicts),
-                },
-                "costs": {
-                    "total_monthly": total_monthly_cost,
-                    "by_service": cost_summary
-                },
-                "changes": {
-                    "added": added_count,
-                    "removed": removed_count,
-                    "modified": modified_count
-                }
-            }
-            # Cache computed stats for this immutable snapshot
-            HISTORY_STATS_CACHE[snap_id_str] = stats
+            # Cache stats directly on the snapshot row in the database
+            snap.total_resources = len(nodes_dicts)
+            snap.total_monthly_cost = total_monthly_cost
+            snap.cost_by_service = cost_summary
+            snap.added_count = added_count
+            snap.removed_count = removed_count
+            snap.modified_count = modified_count
+            
+            db.add(snap)
+            db.commit()
 
             versions_data.append({
                 "version_id": snap_id_str,
@@ -172,7 +177,18 @@ def get_snapshot_history(account_id: Optional[str] = None, db: Session = Depends
                 "label": snap.label or f"Version {snap.version_number}",
                 "is_latest": snap.is_latest,
                 "created_at": snap.created_at.isoformat() if snap.created_at else None,
-                **stats
+                "summary": {
+                    "total_resources": snap.total_resources,
+                },
+                "costs": {
+                    "total_monthly": snap.total_monthly_cost,
+                    "by_service": snap.cost_by_service
+                },
+                "changes": {
+                    "added": snap.added_count,
+                    "removed": snap.removed_count,
+                    "modified": snap.modified_count
+                }
             })
 
         return {

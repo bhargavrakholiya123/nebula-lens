@@ -3,7 +3,7 @@
 
 from sqlalchemy import (
     Column, String, Integer, Boolean,
-    DateTime, Text, ForeignKey, Enum
+    DateTime, Text, ForeignKey, Enum, Float
 )
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
@@ -119,6 +119,14 @@ class Snapshot(Base):
     label          = Column(String(255))                  # e.g. "Version 1"
     is_latest      = Column(Boolean, default=False)  # Set to True for the newest version, False for historical versions.
     created_at     = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Timeline stats dedicated columns
+    total_resources   = Column(Integer, nullable=True, default=0)
+    total_monthly_cost = Column(Float, nullable=True, default=0.0)
+    added_count       = Column(Integer, nullable=True, default=0)
+    removed_count     = Column(Integer, nullable=True, default=0)
+    modified_count    = Column(Integer, nullable=True, default=0)
+    cost_by_service   = Column(JSONB, nullable=True)
 
     # Relationships
     aws_account    = relationship("AwsAccount", back_populates="snapshots")

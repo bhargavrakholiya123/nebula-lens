@@ -26,6 +26,13 @@ try:
         conn.execute(text("ALTER TABLE relationships ADD COLUMN IF NOT EXISTS evidence JSONB;"))
         conn.execute(text("ALTER TABLE relationships ADD COLUMN IF NOT EXISTS category VARCHAR(50);"))
         conn.execute(text("ALTER TABLE normalized_edges ADD COLUMN IF NOT EXISTS category VARCHAR(50);"))
+        # Migrations for dedicated snapshots timeline statistics columns
+        conn.execute(text("ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS total_resources INTEGER DEFAULT 0;"))
+        conn.execute(text("ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS total_monthly_cost DOUBLE PRECISION DEFAULT 0.0;"))
+        conn.execute(text("ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS added_count INTEGER DEFAULT 0;"))
+        conn.execute(text("ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS removed_count INTEGER DEFAULT 0;"))
+        conn.execute(text("ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS modified_count INTEGER DEFAULT 0;"))
+        conn.execute(text("ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS cost_by_service JSONB;"))
     logger.info("Database alter statements executed successfully (if needed).")
 except Exception as e:
     logger.warning(f"Database alter statements failed or not applicable (e.g. SQLite/existing): {e}")

@@ -201,6 +201,37 @@ export default function TimelinePage() {
       }));
   }, [selectedVersion]);
 
+  const formatChangeDetails = (item: any) => {
+    if (!item.change_details) return "";
+    try {
+      const details = typeof item.change_details === "string"
+        ? JSON.parse(item.change_details)
+        : item.change_details;
+
+      if (item.change_type === "added") {
+        return `Discovered new resource: "${details.name || safeLastSegment(item.resource_arn)}"`;
+      }
+      if (item.change_type === "removed") {
+        return `Resource no longer present: "${details.name || safeLastSegment(item.resource_arn)}"`;
+      }
+      if (item.change_type === "modified") {
+        if (details.meta_changes) {
+          const changeStr = Object.entries(details.meta_changes)
+            .map(([key, val]: any) => `• ${key}: "${val.from ?? "N/A"}" ➔ "${val.to ?? "N/A"}"`)
+            .join("\n");
+          return `Configuration changes:\n${changeStr}`;
+        }
+        if (details.name) {
+          return `Renamed resource: "${details.name.from}" ➔ "${details.name.to}"`;
+        }
+        return details.message || "Resource configuration or metadata changed.";
+      }
+      return JSON.stringify(details);
+    } catch (e) {
+      return typeof item.change_details === "string" ? item.change_details : JSON.stringify(item.change_details);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full overflow-hidden bg-[var(--gl-bg-base)]">
       {/* Page Header */}
@@ -434,10 +465,8 @@ export default function TimelinePage() {
                             </div>
 
                             {item.change_details && (
-                              <div className="text-[10px] text-[var(--gl-text-secondary)] font-sans border-t border-[var(--gl-border)]/20 pt-1.5 mt-0.5">
-                                {typeof item.change_details === "string"
-                                  ? item.change_details
-                                  : JSON.stringify(item.change_details)}
+                              <div className="text-[10px] text-[var(--gl-text-secondary)] font-sans border-t border-[var(--gl-border)]/20 pt-1.5 mt-0.5 whitespace-pre-line leading-relaxed">
+                                {formatChangeDetails(item)}
                               </div>
                             )}
                           </div>
