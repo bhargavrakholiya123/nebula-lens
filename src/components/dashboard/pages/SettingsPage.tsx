@@ -192,7 +192,7 @@ export default function SettingsPage() {
                     type="text"
                     value={roleArn}
                     onChange={(e) => setRoleArn(e.target.value)}
-                    placeholder="arn:aws:iam::618642320905:role/GravityLenseROle"
+                    placeholder="arn:aws:iam::618642***905:role/Gravity*****"
                     className="px-3.5 py-2.5 rounded-lg border border-[var(--gl-border)] bg-[var(--gl-bg-base)] text-sm text-[var(--gl-text-primary)] placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[var(--gl-border)]"
                   />
                 </div>
