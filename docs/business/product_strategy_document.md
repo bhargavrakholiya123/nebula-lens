@@ -43,7 +43,7 @@ Nebula Lens empowers technical leadership to regain control over their cloud env
 
 ## Future Roadmap
 - **Multi-Cloud Expansion:** Extending the intelligence engine to support Microsoft Azure and Google Cloud Platform (GCP) for holistic enterprise visibility.
-- **Event-Driven Real-Time Sync:** Transitioning from periodic scanning to real-time webhook ingestion (via AWS EventBridge) for instantaneous drift detection.
+- **Event-Driven Real-Time Sync:** Transitioning from periodic scanning to real-time webhook ingestion for instantaneous drift detection.
 - **AI-Driven Insights:** Leveraging machine learning to automatically flag architectural anti-patterns, predict cost overruns before they happen, and suggest remediation strategies.
 
 ## Success Metrics
