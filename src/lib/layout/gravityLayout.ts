@@ -142,8 +142,21 @@ function toElkNode(
 
   const measured = nodeDimensions?.get(nodeId);
 
-  const leafWidth = measured?.width ?? (node as any).measured?.width ?? node.width ?? DEFAULT_LEAF_W;
-  const leafHeight = measured?.height ?? (node as any).measured?.height ?? node.height ?? DEFAULT_LEAF_H;
+  // Fix 3: Use `> 0` guards instead of `??` throughout the fallback chain.
+  // React Flow can populate measured dimensions with 0 (not undefined) during the
+  // initial measuring pass. A nullish coalesce (`??`) would accept 0 and never
+  // reach the next fallback, causing ELK to pack all nodes at the same point.
+  const leafWidth =
+    (measured?.width ?? 0) > 0      ? measured!.width! :
+    ((node as any).measured?.width ?? 0) > 0 ? (node as any).measured.width :
+    (node.width ?? 0) > 0           ? node.width! :
+    DEFAULT_LEAF_W;
+
+  const leafHeight =
+    (measured?.height ?? 0) > 0      ? measured!.height! :
+    ((node as any).measured?.height ?? 0) > 0 ? (node as any).measured.height :
+    (node.height ?? 0) > 0           ? node.height! :
+    DEFAULT_LEAF_H;
 
   const layoutOptions: Record<string, string> = isContainer
     ? {

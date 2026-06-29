@@ -276,6 +276,10 @@ export default function ArchitectureCanvas() {
 
     if (opts?.isFirstLoad) {
       useCanvasStore.setState({ nodes: layoutedNodes as any });
+      // Fix 1: Resume Zundo — ELK positions are now in the store;
+      // the 250ms debounce will snapshot THIS correct state, not the
+      // pre-layout scatter state that was committed before.
+      useCanvasStore.temporal.getState().resume();
       // Small timeout to allow nodes to mount before fitView
       setTimeout(() => fitView({ padding: 0.15, duration: 0 }), 50);
       return;
@@ -332,7 +336,13 @@ export default function ArchitectureCanvas() {
 
     requestAnimationFrame(() => {
       requestAnimationFrame(async () => {
-        await executeAutoLayout({ force: true, isFirstLoad: true, nodeDimensions });
+        // Fix 4: Do NOT pass nodeDimensions from nodeLookup on first load.
+        // nodeLookup is populated during React Flow's measuring pass and may
+        // contain entries with width:0/height:0 for nodes that haven't been
+        // painted yet. Those zeros override ELK's safe defaults and cause nodes
+        // to be packed at the same point. ELK defaults (DEFAULT_LEAF_W/H) are
+        // safer — they produce a correct layout that React Flow can then measure.
+        await executeAutoLayout({ force: true, isFirstLoad: true });
         setLayoutState('done');
       });
     });

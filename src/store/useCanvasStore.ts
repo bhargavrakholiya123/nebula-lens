@@ -85,13 +85,25 @@ export const useCanvasStore = create<CanvasState>()(
       setActiveSnapshotId: (id) => set({ activeSnapshotId: id }),
 
       onNodesChange: (changes: NodeChange[]) => {
-        let nextNodes = applyNodeChanges(changes, get().nodes) as CloudNode[];
+        // Fix 2: Filter out zero-dimension change events.
+        // React Flow fires `dimensions` changes with { width: 0, height: 0 } during
+        // the initial DOM measuring pass (before nodes are painted). Applying those
+        // zeros would corrupt the stored width/height and make ELK pack everything
+        // at the same point, which is also why manual auto-layout cannot recover.
+        const safeChanges = changes.filter(c => {
+          if (c.type === 'dimensions') {
+            return (c.dimensions?.width ?? 0) > 0 && (c.dimensions?.height ?? 0) > 0;
+          }
+          return true;
+        });
+
+        let nextNodes = applyNodeChanges(safeChanges, get().nodes) as CloudNode[];
         
         // Sync dynamic DOM resizing to explicit node.width/height so the MiniMap updates accurately
-        const hasDimensionChanges = changes.some(c => c.type === 'dimensions');
+        const hasDimensionChanges = safeChanges.some(c => c.type === 'dimensions');
         if (hasDimensionChanges) {
           nextNodes = nextNodes.map(node => {
-            const dimChange = changes.find(c => c.type === 'dimensions' && c.id === node.id);
+            const dimChange = safeChanges.find(c => c.type === 'dimensions' && c.id === node.id);
             if (dimChange && dimChange.type === 'dimensions' && dimChange.dimensions) {
               return {
                 ...node,
@@ -248,6 +260,14 @@ export const useCanvasStore = create<CanvasState>()(
           const cleanEdges = normalizeEdges(data.edges);
           const scattered = setInitialScatterPositions(cleanNodes);
 
+          // Fix 1: Pause Zundo history tracking before committing the scatter-position
+          // (opacity:0) nodes. Without this, the 250ms debounce fires and snapshots
+          // the pre-ELK state, which then becomes the "past" state for undo — meaning
+          // any undo replay would restore invisible, zero-positioned nodes.
+          // ArchitectureCanvas.executeAutoLayout will call temporal.resume() once ELK
+          // has written the final layouted positions to the store.
+          useCanvasStore.temporal.getState().pause();
+
           set({
             nodes: sortByParentFirst(scattered) as CloudNode[],
             edges: cleanEdges as CloudEdge[],
@@ -255,6 +275,8 @@ export const useCanvasStore = create<CanvasState>()(
           });
         } catch (error) {
           console.error("Hydration Error for rendering topology:", error);
+          // Resume temporal on error so undo/redo are not permanently broken
+          useCanvasStore.temporal.getState().resume();
           set({ isLoading: false });
         }
       }
