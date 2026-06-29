@@ -460,23 +460,26 @@ export default function ArchitectureCanvas() {
 
             {/* <Controls /> */}
 
-            <Panel position="top-left" data-tour-id="undo-redo-panel" className="bg-white/80 dark:bg-[#111111] backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 dark:border-[#222222] flex gap-2">
-              <Button
-                variant="outline"
-                onClick={executeUndo}
-                disabled={pastStates.length === 0}
-                className="font-medium text-slate-700 dark:text-slate-300 dark:border-[#333333] dark:hover:bg-[#222222] dark:bg-transparent"
-              >
-                ↩ Undo
-              </Button>
-              <Button
-                variant="outline"
-                onClick={executeRedo}
-                disabled={futureStates.length === 0}
-                className="font-medium text-slate-700 dark:text-slate-300 dark:border-[#333333] dark:hover:bg-[#222222] dark:bg-transparent"
-              >
-                Redo ↪
-              </Button>
+            <Panel position="top-left" className="flex flex-col gap-2 z-50">
+              <div data-tour-id="undo-redo-panel" className="bg-white/80 dark:bg-[#111111] backdrop-blur-md p-2 rounded-xl shadow-sm border border-slate-200 dark:border-[#222222] flex gap-2 w-fit">
+                <Button
+                  variant="outline"
+                  onClick={executeUndo}
+                  disabled={pastStates.length === 0}
+                  className="font-medium text-slate-700 dark:text-slate-300 dark:border-[#333333] dark:hover:bg-[#222222] dark:bg-transparent"
+                >
+                  ↩ Undo
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={executeRedo}
+                  disabled={futureStates.length === 0}
+                  className="font-medium text-slate-700 dark:text-slate-300 dark:border-[#333333] dark:hover:bg-[#222222] dark:bg-transparent"
+                >
+                  Redo ↪
+                </Button>
+              </div>
+              <LayerPanel />
             </Panel>
 
             {activeSnapshotId && (
@@ -494,10 +497,6 @@ export default function ArchitectureCanvas() {
                 </Button>
               </Panel>
             )}
-
-            <Panel position="top-left" className="mt-16 z-50">
-              <LayerPanel />
-            </Panel>
 
             <LensToolbar
               isLayouting={isLayouting}
