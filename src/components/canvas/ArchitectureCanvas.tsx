@@ -316,17 +316,17 @@ export default function ArchitectureCanvas() {
 
   // Handle first load sequence
   useEffect(() => {
-    if (nodes.length > 0 && layoutState === 'idle') {
+    if (nodes.length > 0) {
       const needsInitialLayout = nodes.some(n => n.style?.opacity === 0);
-      if (needsInitialLayout) {
+      if (needsInitialLayout && layoutState !== 'measuring' && layoutState !== 'layouting') {
         setLayoutState('measuring');
-      } else {
+      } else if (!needsInitialLayout && layoutState === 'idle') {
         setLayoutState('done');
       }
     } else if (nodes.length === 0 && layoutState !== 'idle') {
       setLayoutState('idle');
     }
-  }, [nodes.length, layoutState, nodes]);
+  }, [nodes, layoutState]);
 
   useEffect(() => {
     if (!nodesInitialized) return;
