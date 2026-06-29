@@ -1,10 +1,10 @@
-# 🌌 Gravity Lens (Nebula Lens)
+# Gravity Lens (Nebula Lens)
 
 Gravity Lens is a next-generation cloud infrastructure intelligence and cost optimization dashboard. It automatically discovers, visualizes, and monitors your AWS resources, dependencies, and cost progression over time.
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 * **Interactive Flow Canvas**: Visualize your cloud architecture topology dynamically (VPCs, Subnets, EC2s, RDS, Lambdas, S3) using React Flow.
 * **Infrastructure Timeline**: Scroll through snapshot histories chronologically with detailed monthly cost estimations, service breakdowns, and change lists (additions, deletions, and modifications).
@@ -15,7 +15,7 @@ Gravity Lens is a next-generation cloud infrastructure intelligence and cost opt
 
 ---
 
-## ⚙️ Scan & Normalization Architecture
+## Scan & Normalization Architecture
 
 ```mermaid
 sequenceDiagram
@@ -42,7 +42,7 @@ sequenceDiagram
 
 ---
 
-## 🛡️ Deep Dive: AWS CloudWatch Integration
+## Deep Dive: AWS CloudWatch Integration
 
 AWS CloudWatch is Amazon's native monitoring and observability service. It provides you with data and actionable insights to monitor your applications, respond to system-wide performance changes, and optimize resource utilization.
 
@@ -62,7 +62,7 @@ To make our architecture canvas dynamic (not static), the Gravity Lens backend s
 
 ---
 
-## 🛠️ How to Run Locally
+## How to Run Locally
 
 ### 1. Prerequisites
 Ensure you have the following installed:
