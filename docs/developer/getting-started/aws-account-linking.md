@@ -72,37 +72,7 @@ To perform discovery without mutating customer infrastructure, the role requires
 
 ## 6. Linking Workflow
 
-```mermaid
-sequenceDiagram
-    actor User
-    participant Frontend as Settings Page (UI)
-    participant API as Backend API (/api/aws/connect)
-    participant STS as AWS STS
-    participant DB as Database (PostgreSQL)
-
-    User->>Frontend: Enter Role ARN & Account Name
-    Frontend->>API: POST {role_arn, account_name}
-    API->>STS: AssumeRole (RoleArn, SessionName="GravityLensVerification")
-    alt Verification Success
-        STS-->>API: Returns Temporary Credentials
-        API->>STS: GetCallerIdentity (using temp creds)
-        STS-->>API: Returns AccountId, Arn, UserId
-        API->>DB: Check if AccountId already exists
-        alt Exists
-            DB-->>API: Account found
-            API-->>Frontend: 400 Bad Request (Already connected)
-        else New Account
-            API->>DB: Insert AwsAccount record
-            API->>DB: Insert initial ScanJob (status=pending)
-            API-->>Frontend: 200 OK (Account connected, scan queued)
-            Frontend-->>User: Success Message & Update UI
-        end
-    else Verification Failure
-        STS-->>API: ClientError (AccessDenied / InvalidClientTokenId)
-        API-->>Frontend: 400 Bad Request (Error details)
-        Frontend-->>User: Display Error Message
-    end
-```
+![Account Linking Workflow](../image-2.png)
 
 ## 7. Backend Processing
 The core linking logic is implemented in the FastAPI backend:
