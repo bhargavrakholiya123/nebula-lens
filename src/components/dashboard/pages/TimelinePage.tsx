@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useDashboardStore } from "../useDashboardStore";
-import { Clock, ArrowsClockwise, GitFork, TrendUp, Folder, Info, Trash, Plus, X } from "@phosphor-icons/react";
+import { Clock, ArrowsClockwise, GitFork, TrendUp, Folder, Info, Plus, X } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { MotionCarousel } from "@/components/animate-ui/components/community/motion-carousel";
@@ -157,25 +157,6 @@ export default function TimelinePage() {
     }
   };
 
-  const handleDeleteSnapshot = async () => {
-    if (!selectedVersion) return;
-    const confirm = window.confirm(`Permanently delete ${selectedVersion.label} and all its data?`);
-    if (!confirm) return;
-
-    try {
-      const res = await fetch(`/api/db/data?table=snapshots&id=${selectedVersion.version_id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        alert("Snapshot deleted successfully.");
-        await fetchHistory();
-      } else {
-        alert("Failed to delete snapshot.");
-      }
-    } catch (err) {
-      console.error("Delete snapshot error:", err);
-    }
-  };
 
   const handleViewGraph = async (version: SnapshotVersion) => {
     setActiveSnapshotId(version.version_id);
@@ -295,11 +276,8 @@ export default function TimelinePage() {
                   totalIndex={versions.length}
                   onPrev={handlePrev}
                   onNext={handleNext}
-                  onDelete={handleDeleteSnapshot}
                   onScan={handleTriggerScan}
-                  onReplay={() => selectedVersion && handleViewGraph(selectedVersion)}
                   isScanLoading={isScanLoading}
-                  isReplayDisabled={!selectedVersion}
                 />
               </div>
             </div>
@@ -338,8 +316,8 @@ export default function TimelinePage() {
                 <button
                   onClick={() => setActiveTab("summary")}
                   className={`py-3 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${activeTab === "summary"
-                      ? "border-indigo-500 text-indigo-400"
-                      : "border-transparent text-[var(--gl-text-muted)] hover:text-[var(--gl-text-secondary)]"
+                    ? "border-indigo-500 text-indigo-400"
+                    : "border-transparent text-[var(--gl-text-muted)] hover:text-[var(--gl-text-secondary)]"
                     }`}
                 >
                   Summary
@@ -347,8 +325,8 @@ export default function TimelinePage() {
                 <button
                   onClick={() => setActiveTab("changes")}
                   className={`py-3 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-all flex items-center gap-1.5 ${activeTab === "changes"
-                      ? "border-indigo-500 text-indigo-400"
-                      : "border-transparent text-[var(--gl-text-muted)] hover:text-[var(--gl-text-secondary)]"
+                    ? "border-indigo-500 text-indigo-400"
+                    : "border-transparent text-[var(--gl-text-muted)] hover:text-[var(--gl-text-secondary)]"
                     }`}
                 >
                   <GitFork size={14} />
@@ -439,18 +417,18 @@ export default function TimelinePage() {
                           <div
                             key={item.id || `${item.resource_arn}-${idx}`}
                             className={`p-3 rounded-xl border flex flex-col gap-1.5 ${item.change_type === "added"
-                                ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-400"
-                                : item.change_type === "removed"
-                                  ? "bg-red-500/5 border-red-500/20 text-red-400"
-                                  : "bg-amber-500/5 border-amber-500/20 text-amber-400"
+                              ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-400"
+                              : item.change_type === "removed"
+                                ? "bg-red-500/5 border-red-500/20 text-red-400"
+                                : "bg-amber-500/5 border-amber-500/20 text-amber-400"
                               }`}
                           >
                             <div className="flex justify-between items-center gap-3">
                               <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider font-mono ${item.change_type === "added"
-                                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                                  : item.change_type === "removed"
-                                    ? "bg-red-500/10 border-red-500/20 text-red-400"
-                                    : "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                                : item.change_type === "removed"
+                                  ? "bg-red-500/10 border-red-500/20 text-red-400"
+                                  : "bg-amber-500/10 border-amber-500/20 text-amber-400"
                                 }`}>
                                 {item.change_type}
                               </span>
@@ -477,15 +455,7 @@ export default function TimelinePage() {
                 )}
               </div>
 
-              {/* Replay Graph button in footer */}
-              <div className="p-6 border-t border-[var(--gl-border)] bg-[var(--gl-bg-muted)]/20 shrink-0">
-                <Button
-                  onClick={() => handleViewGraph(selectedVersion)}
-                  className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-2 text-sm rounded-xl shadow-lg shadow-indigo-600/20 transition-all duration-200"
-                >
-                  Replay Graph State
-                </Button>
-              </div>
+
             </motion.div>
           )}
         </AnimatePresence>

@@ -10,20 +10,13 @@ import {
   Terminal,
 } from "@phosphor-icons/react";
 import { NavMain, type NavMainItem } from "./NavMain";
-import { NavUser } from "./NavUser";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-
-const MOCK_USER = {
-  name: "admin",
-  email: "admin@gravity-lens.io",
-};
 
 const navigationItems: NavMainItem[] = [
   { title: "Overview", id: "overview", icon: SquaresFour },
@@ -106,9 +99,6 @@ function AppSidebarInner(props: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={navigationItems} />
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-[var(--gl-border)] p-2">
-        <NavUser user={MOCK_USER} />
-      </SidebarFooter>
 
       <SidebarRail />
     </Sidebar>

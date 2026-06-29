@@ -9,7 +9,7 @@ import {
   ArrowsClockwise, ArrowCounterClockwise,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDashboardStore } from "./useDashboardStore";
 import type { DashboardSection } from "./useDashboardStore";
@@ -216,20 +216,6 @@ export function TopHeader() {
         <TooltipContent side="bottom">Toggle theme</TooltipContent>
       </Tooltip>
 
-      {/* Divider */}
-      <div className="w-px h-5 bg-[var(--gl-border)]" />
-
-      {/* User Avatar */}
-      <div className="flex items-center gap-2">
-        <Avatar className="h-7 w-7 ring-1 ring-[var(--gl-border)]">
-          <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-xs font-bold">
-            GL
-          </AvatarFallback>
-        </Avatar>
-        <span className="text-xs font-medium text-[var(--gl-text-secondary)] hidden lg:block">
-          admin
-        </span>
-      </div>
 
     </header>
   );
