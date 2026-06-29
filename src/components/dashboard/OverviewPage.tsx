@@ -7,14 +7,13 @@ import {
   Clock, GitBranch, Globe, ArrowUpRight, ArrowDownRight,
   Minus, ArrowsClockwise, Eye, Scroll, ClockCounterClockwise, CheckCircle
 } from "@phosphor-icons/react";
-import { MOCK_SERVICES } from "./data/services";
-import { MOCK_ALERTS } from "./data/alerts";
-import { MOCK_SNAPSHOTS } from "./data/snapshots";
 import { useRouter } from "next/navigation";
+import { useCanvasStore } from "@/store/useCanvasStore";
 import { staggerContainer, staggerItem } from "../../lib/motion";
 import { useRelativeTime } from "../../hooks/useRelativeTime";
 import { Sparkline } from "./Sparkline";
 import { getContextualGreeting } from "../../lib/greetings";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardHeader,
@@ -24,6 +23,44 @@ import {
   CardContent,
   CardFooter,
 } from "../ui/card";
+
+/* ──────────────── Region and Service Metadata ──────────────── */
+const REGION_META_MAP: Record<string, { label: string; color: string }> = {
+  "us-east-1": { label: "N. Virginia", color: "#6366F1" },
+  "us-east-2": { label: "Ohio", color: "#3B82F6" },
+  "us-west-1": { label: "N. California", color: "#06B6D4" },
+  "us-west-2": { label: "Oregon", color: "#14B8A6" },
+  "ap-south-1": { label: "Mumbai", color: "#10B981" },
+  "eu-west-1": { label: "Ireland", color: "#F59E0B" },
+  "eu-central-1": { label: "Frankfurt", color: "#F97316" },
+  "global": { label: "Global", color: "#EC4899" },
+};
+
+const SERVICE_COLOR_MAP: Record<string, string> = {
+  vpc:        "#A855F7",
+  subnet:     "#6366F1",
+  ec2:        "#F59E0B",
+  lambda:     "#EC4899",
+  rds:        "#06B6D4",
+  s3:         "#10B981",
+  sqs:        "#F97316",
+  apigateway: "#8B5CF6",
+  cloudfront: "#14B8A6",
+  dynamodb:   "#3B82F6",
+};
+
+const SERVICE_LABEL_MAP: Record<string, string> = {
+  vpc:        "VPC",
+  subnet:     "Subnet",
+  ec2:        "EC2",
+  lambda:     "Lambda",
+  rds:        "RDS",
+  s3:         "S3",
+  sqs:        "SQS",
+  apigateway: "API Gateway",
+  cloudfront: "CloudFront",
+  dynamodb:   "DynamoDB",
+};
 
 /* ──────────────── Compact Stat Card (Row 2) ──────────────── */
 interface StatCardProps {
@@ -127,20 +164,22 @@ function HealthRing({ score, size = 140 }: { score: number, size?: number }) {
   );
 }
 
-/* ──────────────── Activity Feed ──────────────── */
-const RECENT_ACTIVITY = [
-  { time: "2m ago", icon: ArrowsClockwise, color: "#6366F1", msg: "Auto-scan completed — 12 resources mapped" },
-  { time: "14m ago", icon: Warning, color: "#F59E0B", msg: "Lambda error rate above 2% threshold" },
-  { time: "1h ago", icon: GitBranch, color: "#10B981", msg: "Snapshot v1.3.1 saved — 1 new resource" },
-  { time: "2h ago", icon: Warning, color: "#EF4444", msg: "CloudFront 503 errors detected (5.8%)" },
-  { time: "3h ago", icon: CurrencyDollar, color: "#A855F7", msg: "Cost anomaly: Lambda 18% above baseline" },
-];
+/* ──────────────── Helper relative time calculation ──────────────── */
+function formatRelativeTime(dateString: string | Date | null | undefined): string {
+  if (!dateString) return "N/A";
+  const d = typeof dateString === "string" ? new Date(dateString) : dateString;
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
 
-/* ──────────────── Region Map (text-based) ──────────────── */
-const REGIONS = [
-  { name: "ap-south-a1", label: "Mumbai", count: 10, color: "#6366F1" },
-  { name: "global", label: "Global", count: 2, color: "#14B8A6" },
-];
+  if (diffInSeconds < 0) return "just now";
+  if (diffInSeconds < 60) return "just now";
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays}d ago`;
+}
 
 /* ──────────────── Animation Variants ──────────────── */
 const activityContainer = {
@@ -157,8 +196,7 @@ const activityItem = {
 };
 
 const quickActionVariants = {
-  hover: {
-  }
+  hover: {}
 };
 
 const iconVariants = {
@@ -171,50 +209,263 @@ const iconVariants = {
 /* ──────────────── Overview Page ──────────────── */
 export default function OverviewPage() {
   const router = useRouter();
-  const [scanTime] = useState(() => new Date(Date.now() - 120000));
-  const lastScanText = useRelativeTime(scanTime);
+  
+  // Zustand Store
+  const { selectedAccountId, connectedAccounts } = useCanvasStore();
 
+  // Component State
+  const [loading, setLoading] = useState(true);
+  const [versions, setVersions] = useState<any[]>([]);
+  const [latestSnapshotNodes, setLatestSnapshotNodes] = useState<any[]>([]);
+  const [costHistory, setCostHistory] = useState<number[]>([]);
+  const [costTrend, setCostTrend] = useState<"up" | "down" | "neutral">("neutral");
+  const [costTrendValue, setCostTrendValue] = useState<string>("0%");
+  
   // Scan Button State
   const [scanStatus, setScanStatus] = useState<"idle" | "scanning" | "done">("idle");
   const [scanProgress, setScanProgress] = useState(0);
 
-  const handleScan = () => {
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const url = selectedAccountId ? `/api/history?account_id=${selectedAccountId}` : "/api/history";
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        const list = data.versions || [];
+        setVersions(list);
+
+        if (list.length > 0) {
+          const latestSnap = list[0];
+          
+          // Fetch graph data for the latest snapshot to analyze services and regions
+          const graphRes = await fetch(`/api/history?snapshot_id=${latestSnap.version_id}`);
+          if (graphRes.ok) {
+            const graphData = await graphRes.json();
+            setLatestSnapshotNodes(graphData.nodes || []);
+          }
+
+          // Calculate cost history for sparkline (chronological, last 7 scans)
+          const historyCosts = list
+            .slice(0, 7)
+            .reverse()
+            .map((v: any) => v.costs?.total_monthly || 0);
+          setCostHistory(historyCosts);
+
+          // Calculate trend based on previous scan cost
+          if (list.length >= 2) {
+            const currentCost = list[0].costs?.total_monthly || 0;
+            const previousCost = list[1].costs?.total_monthly || 0;
+            if (previousCost > 0) {
+              const diffPercent = ((currentCost - previousCost) / previousCost) * 100;
+              setCostTrend(diffPercent > 0.5 ? "up" : diffPercent < -0.5 ? "down" : "neutral");
+              setCostTrendValue(`${diffPercent > 0 ? "+" : ""}${diffPercent.toFixed(0)}%`);
+            } else {
+              setCostTrend("neutral");
+              setCostTrendValue("0%");
+            }
+          } else {
+            setCostTrend("neutral");
+            setCostTrendValue("0%");
+          }
+        } else {
+          setLatestSnapshotNodes([]);
+          setCostHistory([]);
+          setCostTrend("neutral");
+          setCostTrendValue("0%");
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching dashboard overview data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [selectedAccountId]);
+
+  const handleScan = async () => {
     if (scanStatus !== "idle") return;
+    
+    // Find the AWS Account ID
+    const currentAccount = connectedAccounts.find(a => a.id === selectedAccountId || a.account_id === selectedAccountId);
+    const awsAccountId = currentAccount?.account_id;
+    if (!awsAccountId) {
+      alert("Please select a connected AWS Account first.");
+      return;
+    }
+
     setScanStatus("scanning");
     setScanProgress(0);
 
-    // TODO: Connect to real scan progress/websocket
-    let currentProgress = 0;
-    const intervalId = setInterval(() => {
-      currentProgress += 1;
-      setScanProgress(currentProgress);
+    try {
+      const res = await fetch(`/api/scan/trigger?account_id=${awsAccountId}`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        // Simulating scan progress
+        let currentProgress = 0;
+        const intervalId = setInterval(() => {
+          currentProgress += 1;
+          setScanProgress(currentProgress);
 
-      if (currentProgress >= 12) {
-        clearInterval(intervalId);
-        setScanStatus("done");
-        setTimeout(() => {
-          setScanStatus("idle");
-          setScanProgress(0);
-        }, 800);
+          if (currentProgress >= 12) {
+            clearInterval(intervalId);
+            setScanStatus("done");
+            fetchDashboardData(); // Reload stats
+            setTimeout(() => {
+              setScanStatus("idle");
+              setScanProgress(0);
+            }, 800);
+          }
+        }, 200);
+      } else {
+        alert("Failed to queue new scan. Make sure your local scan worker is active.");
+        setScanStatus("idle");
       }
-    }, 150);
+    } catch (err) {
+      console.error("Scan error:", err);
+      alert("An error occurred while triggering the scan.");
+      setScanStatus("idle");
+    }
   };
 
-  const totalServices = MOCK_SERVICES.length;
-  const monthlyCost = MOCK_SERVICES.reduce((acc, s) => acc + s.cost, 0);
-  const openAlerts = MOCK_ALERTS.filter((a) => a.status === "open").length;
-  const criticalAlerts = MOCK_ALERTS.filter((a) => a.severity === "critical" && a.status === "open").length;
-  const highAlerts = MOCK_ALERTS.filter((a) => a.severity === "high" && a.status === "open").length;
+  // ── Layout Calculations ──
+  const latestSnap = versions[0];
+  const totalResourcesCount = latestSnapshotNodes.length;
 
-  const healthyCount = MOCK_SERVICES.filter((s) => s.status === "healthy").length;
-  const healthScore = Math.round((healthyCount / totalServices) * 100);
-  const currentSnap = MOCK_SNAPSHOTS[MOCK_SNAPSHOTS.length - 1];
-  const recentChanges = MOCK_SNAPSHOTS.slice(-3).reduce((acc, s) => acc + s.changes.length, 0);
+  const serviceSet = new Set(
+    latestSnapshotNodes
+      .map(n => n.data?.service)
+      .filter(s => s && s !== "vpc" && s !== "subnet" && s !== "az")
+  );
+  const distinctServiceCount = serviceSet.size;
+
+  const monthlyCost = latestSnap?.costs?.total_monthly || 0;
+
+  // Determine health mapping per node
+  const getNodeStatus = (node: any): "healthy" | "warning" | "error" => {
+    const insights = node.data?.insights || "";
+    if (insights.toLowerCase().includes("error") || insights.toLowerCase().includes("critical")) {
+      return "error";
+    }
+    if (insights.toLowerCase().includes("warning") || insights.toLowerCase().includes("inferred")) {
+      return "warning";
+    }
+    const metrics = node.data?.metricsSummary || node.data?.metrics || {};
+    if (metrics.errorRate > 5 || metrics.cpu > 85) {
+      return "error";
+    }
+    if (metrics.errorRate > 2 || metrics.cpu > 70) {
+      return "warning";
+    }
+    return "healthy";
+  };
+
+  const nodesWithStatus = latestSnapshotNodes.map(n => ({
+    ...n,
+    status: getNodeStatus(n)
+  }));
+
+  const healthyCount = nodesWithStatus.filter(n => n.status === "healthy").length;
+  const nonHealthyNodes = nodesWithStatus.filter(n => n.status !== "healthy");
+  const healthScore = totalResourcesCount > 0 
+    ? Math.round((healthyCount / totalResourcesCount) * 100) 
+    : 100;
+
+  const criticalAlerts = nodesWithStatus.filter(n => n.status === "error").length;
+  const highAlerts = nodesWithStatus.filter(n => n.status === "warning").length;
+  const openAlerts = criticalAlerts + highAlerts;
 
   const { message: greetingMsg, colorClass: greetingColor } = getContextualGreeting({
     criticalAlerts,
     healthScore,
   });
+
+  const recentChanges = versions.slice(0, 3).reduce((acc, s) => {
+    const c = s.changes || {};
+    return acc + (c.added || 0) + (c.removed || 0) + (c.modified || 0);
+  }, 0);
+
+  // Group by regions
+  const regionCounts: Record<string, number> = {};
+  latestSnapshotNodes.forEach(node => {
+    const r = node.data?.region || "global";
+    regionCounts[r] = (regionCounts[r] || 0) + 1;
+  });
+  const regionsList = Object.entries(regionCounts).map(([name, count]) => {
+    const meta = REGION_META_MAP[name] || { label: name.toUpperCase(), color: "#A855F7" };
+    return {
+      name,
+      label: meta.label,
+      count,
+      color: meta.color
+    };
+  });
+
+  // Group by services
+  const serviceCounts: Record<string, number> = {};
+  latestSnapshotNodes.forEach(node => {
+    const svc = node.data?.service;
+    if (svc && svc !== "vpc" && svc !== "subnet" && svc !== "az") {
+      serviceCounts[svc] = (serviceCounts[svc] || 0) + 1;
+    }
+  });
+  const serviceBreakdown = Object.entries(serviceCounts).map(([type, count]) => {
+    const color = SERVICE_COLOR_MAP[type] || "#A855F7";
+    const label = SERVICE_LABEL_MAP[type] || type.toUpperCase();
+    return {
+      type: label,
+      count,
+      color
+    };
+  });
+
+  // Activity list mapping (static for demo/UI completeness)
+  const recentActivity = [
+    { time: "2m ago", icon: ArrowsClockwise, color: "#6366F1", msg: "Auto-scan completed — 12 resources mapped" },
+    { time: "14m ago", icon: Warning, color: "#F59E0B", msg: "Lambda error rate above 2% threshold" },
+    { time: "1h ago", icon: GitBranch, color: "#10B981", msg: "Snapshot v1.3.1 saved — 1 new resource" },
+    { time: "2h ago", icon: Warning, color: "#EF4444", msg: "CloudFront 503 errors detected (5.8%)" },
+    { time: "3h ago", icon: CurrencyDollar, color: "#A855F7", msg: "Cost anomaly: Lambda 18% above baseline" },
+  ];
+
+  // Fetch hook relative time string for the header scan label
+  const headerScanText = useRelativeTime(latestSnap ? new Date(latestSnap.created_at) : new Date());
+
+  if (loading) {
+    return (
+      <div className="p-6 max-w-[1200px] mx-auto space-y-6 flex flex-col justify-center items-center h-[60vh]">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+          className="text-indigo-500 mb-4"
+        >
+          <ArrowsClockwise size={32} />
+        </motion.div>
+        <p className="text-sm text-muted-foreground font-medium">Loading infrastructure metrics...</p>
+      </div>
+    );
+  }
+
+  if (versions.length === 0) {
+    return (
+      <div className="p-6 max-w-[1200px] mx-auto space-y-6 flex flex-col justify-center items-center h-[60vh] text-center">
+        <div className="w-16 h-16 rounded-2xl bg-muted border border-border flex items-center justify-center mb-4 text-muted-foreground">
+          <HardDrives size={32} />
+        </div>
+        <h2 className="text-lg font-medium text-foreground">No Snapshot History Found</h2>
+        <p className="text-sm text-muted-foreground max-w-sm mt-1">
+          This AWS account hasn't been scanned yet, or there are no snapshots saved in the database.
+        </p>
+        <Button onClick={handleScan} disabled={scanStatus !== "idle"} className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white gap-2 font-bold px-5 h-10 rounded-xl">
+          {scanStatus === "scanning" ? "Scanning..." : "Trigger First Scan"}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-[1200px] mx-auto space-y-6">
@@ -241,19 +492,19 @@ export default function OverviewPage() {
           </motion.div>
 
           <div className="text-xs font-medium text-muted-foreground mt-1 flex items-center gap-1">
-            <span>{currentSnap.version} · Last scanned </span>
+            <span>v{latestSnap.version_number} · Last scanned </span>
             <AnimatePresence mode="wait">
               <motion.span
-                key={lastScanText}
+                key={headerScanText}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
               >
-                {lastScanText}
+                {headerScanText}
               </motion.span>
             </AnimatePresence>
-            <span> · {currentSnap.totalResources} resources tracked</span>
+            <span> · {totalResourcesCount} resources tracked</span>
           </div>
         </div>
 
@@ -346,14 +597,17 @@ export default function OverviewPage() {
             <div className="flex-1 text-center md:text-left">
               <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">System Health</h2>
               <p className="text-sm text-muted-foreground mb-3">
-                {healthyCount}/{totalServices} services healthy
+                {healthyCount}/{totalResourcesCount} resources healthy
               </p>
               <div className="flex flex-wrap justify-center md:justify-start gap-2">
-                {MOCK_SERVICES.filter(s => s.status !== "healthy").map(s => (
+                {nonHealthyNodes.slice(0, 5).map(s => (
                   <span key={s.id} className="text-xs px-2 py-1 rounded bg-muted text-muted-foreground border border-border">
-                    {s.name.split("-").slice(-1)[0]}
+                    {s.data?.name || s.id.split("/").slice(-1)[0]}
                   </span>
                 ))}
+                {nonHealthyNodes.length === 0 && (
+                  <span className="text-xs text-muted-foreground italic">All mapped resources are healthy</span>
+                )}
               </div>
             </div>
           </Card>
@@ -380,7 +634,7 @@ export default function OverviewPage() {
                     <div className="text-4xl font-medium leading-none text-foreground">
                       {openAlerts}
                     </div>
-                    <Sparkline data={[15, 13, 14, 11, 9, 6, 2]} color="#10B981" width={64} height={20} />
+                    <Sparkline data={[15, 13, 14, 11, 9, 6, openAlerts]} color="#EF4444" width={64} height={20} />
                   </div>
                   {criticalAlerts > 0 ? (
                     <p className="text-sm">
@@ -412,16 +666,20 @@ export default function OverviewPage() {
         animate="animate"
         className="grid grid-cols-2 md:grid-cols-5 gap-3"
       >
-        <CompactStatCard title="Total Services" value={totalServices}
+        <CompactStatCard title="Total Services" value={distinctServiceCount}
           icon={HardDrives} iconColor="#6366F1" iconBg="rgba(99,102,241,0.12)" />
+        
         <CompactStatCard title="Monthly Cost" value={`$${monthlyCost.toFixed(0)}`} sub="est. this month"
-          icon={CurrencyDollar} iconColor="#10B981" iconBg="rgba(16,185,129,0.12)" trend="up" trendValue="+18%"
-          sparklineData={[1120, 1150, 1180, 1200, 1190, 1250, 1280]} sparklineColor="#6366F1" />
-        <CompactStatCard title="Last Scan" value={lastScanText} sub="Next in 22 min"
+          icon={CurrencyDollar} iconColor="#10B981" iconBg="rgba(16,185,129,0.12)" trend={costTrend} trendValue={costTrendValue}
+          sparklineData={costHistory.length > 0 ? costHistory : [0]} sparklineColor="#6366F1" />
+        
+        <CompactStatCard title="Last Scan" value={headerScanText} sub="Live tracking"
           icon={Clock} iconColor="#06B6D4" iconBg="rgba(6,182,212,0.12)" />
-        <CompactStatCard title="Recent Changes" value={recentChanges} sub="past 48 hours"
+        
+        <CompactStatCard title="Recent Changes" value={recentChanges} sub="past 3 scans"
           icon={GitBranch} iconColor="#A855F7" iconBg="rgba(168,85,247,0.12)" />
-        <CompactStatCard title="Regions" value={REGIONS.length} sub="us-east-1 + global"
+        
+        <CompactStatCard title="Regions" value={regionsList.length} sub={regionsList.map(r => r.label).join(" + ")}
           icon={Globe} iconColor="#14B8A6" iconBg="rgba(20,184,166,0.12)" />
       </motion.div>
 
@@ -455,8 +713,8 @@ export default function OverviewPage() {
               animate="animate"
               className="space-y-0"
             >
-              {RECENT_ACTIVITY.length > 0 ? (
-                RECENT_ACTIVITY.map((item, i) => {
+              {recentActivity.length > 0 ? (
+                recentActivity.map((item, i) => {
                   const Icon = item.icon;
                   return (
                     <motion.div
@@ -546,20 +804,20 @@ export default function OverviewPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {REGIONS.length === 1 ? (
+                {regionsList.length === 1 ? (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.2 }}
                     className="flex items-center gap-2 py-1"
                   >
-                    <Globe size={18} style={{ color: REGIONS[0].color }} />
+                    <Globe size={18} style={{ color: regionsList[0].color }} />
                     <span className="text-sm font-medium text-foreground">
-                      {REGIONS[0].count} resources mapped in {REGIONS[0].label}
+                      {regionsList[0].count} resources mapped in {regionsList[0].label}
                     </span>
                   </motion.div>
                 ) : (
-                  REGIONS.map((r, i) => (
+                  regionsList.map((r, i) => (
                     <div key={r.name} className="flex items-center gap-3">
                       <div className="flex items-center gap-2 w-32 shrink-0">
                         <Globe size={14} style={{ color: r.color }} />
@@ -570,7 +828,7 @@ export default function OverviewPage() {
                           className="h-full rounded-full"
                           style={{ background: r.color, opacity: 0.7 }}
                           initial={{ width: 0 }}
-                          animate={{ width: `${(r.count / totalServices) * 100}%` }}
+                          animate={{ width: `${(r.count / totalResourcesCount) * 100}%` }}
                           transition={{ delay: 0.3 + i * 0.3, duration: 0.6, ease: "easeOut" }}
                         />
                       </div>
@@ -582,22 +840,18 @@ export default function OverviewPage() {
 
               {/* Service type grid */}
               <div className="mt-4 grid grid-cols-4 gap-2">
-                {[
-                  { type: "Lambda", count: 2, color: "#EC4899" },
-                  { type: "S3", count: 2, color: "#10B981" },
-                  { type: "RDS", count: 1, color: "#06B6D4" },
-                  { type: "EC2", count: 1, color: "#F59E0B" },
-                  { type: "API GW", count: 1, color: "#8B5CF6" },
-                  { type: "SQS", count: 1, color: "#F97316" },
-                  { type: "DynamoDB", count: 1, color: "#3B82F6" },
-                  { type: "CloudFront", count: 1, color: "#14B8A6" },
-                ].map(({ type, count, color }) => (
+                {serviceBreakdown.slice(0, 8).map(({ type, count, color }) => (
                   <div key={type} className="bg-card border border-border rounded-lg p-2 text-center"
                     style={{ background: `${color}10`, border: `1px solid ${color}20` }}>
                     <p className="text-[10px] font-medium font-sans" style={{ color }}>{count}</p>
                     <p className="text-[8px] text-muted-foreground mt-0.5 leading-tight">{type}</p>
                   </div>
                 ))}
+                {serviceBreakdown.length === 0 && (
+                  <div className="col-span-4 text-center text-xs text-muted-foreground py-4 italic">
+                    No resource categories detected
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
