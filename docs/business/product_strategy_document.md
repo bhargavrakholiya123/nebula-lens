@@ -10,7 +10,7 @@ As cloud footprints scale from dozens to thousands of resources, cloud infrastru
 - **The Engineering vs. Finance Gap:** Cloud costs are rarely tied directly to architectural decisions in real-time, making FinOps reactive rather than proactive.
 
 ## Solution Overview
-Nebula Lens is an automated cloud infrastructure intelligence and cost optimization platform. Operating completely agentless, it continuously discovers, normalizes, and visualizes AWS cloud environments. It provides organizations with a living, breathing, interactive map of their architecture that tracks dependencies, monitors state drift, and calculates financial impact in real-time.
+Nebula Lens is an automated cloud infrastructure intelligence and cost optimization platform. Operating continuously discovers, normalizes, and visualizes AWS cloud environments. It provides organizations with a living, breathing, interactive map of their architecture that tracks dependencies, monitors state drift, and calculates financial impact in real-time.
 
 ## Business Value
 Nebula Lens directly impacts the bottom line by bridging the gap between Engineering, Security, and Finance:
@@ -43,7 +43,7 @@ Nebula Lens empowers technical leadership to regain control over their cloud env
 
 ## Future Roadmap
 - **Multi-Cloud Expansion:** Extending the intelligence engine to support Microsoft Azure and Google Cloud Platform (GCP) for holistic enterprise visibility.
-- **Event-Driven Real-Time Sync:** Transitioning from periodic scanning to real-time webhook ingestion (via AWS EventBridge) for instantaneous drift detection.
+- **Event-Driven Real-Time Sync:** Transitioning from periodic scanning to real-time webhook ingestion for instantaneous drift detection.
 - **AI-Driven Insights:** Leveraging machine learning to automatically flag architectural anti-patterns, predict cost overruns before they happen, and suggest remediation strategies.
 
 ## Success Metrics
