@@ -177,50 +177,7 @@ const TOUR_STEPS: TourStep[] = [
       store.setSelectedNodeId('lambda-processor');
     }
   },
-  {
-    id: 'security-lens',
-    title: 'SecOps: Security Posture',
-    description: 'The security lens audits your infrastructure for misconfigurations. Amber borders flag compliance violations, and red dashed lines trace lateral breach paths an attacker could exploit.',
-    icon: ShieldCheckIcon,
-    targetId: 'canvas-viewport',
-    placement: 'right',
-    spotlightPadding: 0,
-    delay: 400,
-    action: (store) => {
-      store.setActiveLens('security');
-      store.setSelectedNodeId(null);
-      store.setComplianceFramework('general');
-    }
-  },
-  {
-    id: 'frameworks-intro',
-    title: 'Regulatory Frameworks',
-    description: 'Notice these tabs in the Global Overview? They let you switch between different compliance standards. Let\'s highlight them so you know exactly where to look.',
-    icon: ShieldIcon,
-    targetId: 'compliance-tabs',
-    placement: 'left',
-    spotlightPadding: 4,
-    delay: 400,
-    action: (store) => {
-      store.setActiveLens('security');
-      store.setSelectedNodeId(null);
-      store.setComplianceFramework('general');
-    }
-  },
-  {
-    id: 'compliance-frameworks',
-    title: 'Compliance Framework Switching',
-    description: 'Watch the tabs cycle through General → SOC2 → HIPAA. Each framework audits against different regulatory standards, revealing unique violations and remediation steps.',
-    icon: ShieldIcon,
-    targetId: 'compliance-tabs',
-    placement: 'left',
-    disableDimming: true,
-    spotlightPadding: 4,
-    delay: 600,
-    action: () => {
-      // Action handled by dedicated compliance cycling effect
-    }
-  },
+
   {
     id: 'undo-redo',
     title: 'Undo / Redo with Animation',
@@ -489,19 +446,7 @@ export default function ProductTour() {
       setTimeout(() => setShowTooltip(true), 120);
     }, settleDelay);
 
-    // Phase 5: If compliance step, start cycling after tooltip appears
-    if (step.id === 'compliance-frameworks') {
-      const base = settleDelay + 400;
-      const t1 = setTimeout(() => {
-        setActiveLens('security');
-        setSelectedNodeId(null);
-        setComplianceFramework('general');
-      }, base);
-      const t2 = setTimeout(() => setComplianceFramework('soc2'), base + 1200);
-      const t3 = setTimeout(() => setComplianceFramework('hipaa'), base + 2800);
-      const t4 = setTimeout(() => setComplianceFramework('general'), base + 4400);
-      complianceTimersRef.current = [t1, t2, t3, t4];
-    }
+
 
     return () => {
       if (stepTimerRef.current) clearTimeout(stepTimerRef.current);
@@ -578,9 +523,7 @@ export default function ProductTour() {
       case 'cost-lens':
       case 'cost-node-interaction':
         return { text: 'text-emerald-500', iconBg: 'bg-emerald-50 dark:bg-emerald-500/10', iconBorder: 'border-emerald-200 dark:border-emerald-500/20' };
-      case 'security-lens':
-      case 'compliance-frameworks':
-        return { text: 'text-amber-500', iconBg: 'bg-amber-50 dark:bg-amber-500/10', iconBorder: 'border-amber-200 dark:border-amber-500/20' };
+
       case 'live-stream':
         return { text: 'text-red-500', iconBg: 'bg-red-50 dark:bg-red-500/10', iconBorder: 'border-red-200 dark:border-red-500/20' };
       case 'complete':
@@ -665,10 +608,10 @@ export default function ProductTour() {
                           <motion.div
                             key={i}
                             className={`rounded-full ${i === currentStep
-                                ? 'bg-[var(--gl-brand-accent,#7C6FF7)]'
-                                : i < currentStep
-                                  ? 'bg-[var(--gl-brand-accent,#7C6FF7)] opacity-50'
-                                  : 'bg-slate-200 dark:bg-slate-700'
+                              ? 'bg-[var(--gl-brand-accent,#7C6FF7)]'
+                              : i < currentStep
+                                ? 'bg-[var(--gl-brand-accent,#7C6FF7)] opacity-50'
+                                : 'bg-slate-200 dark:bg-slate-700'
                               }`}
                             initial={false}
                             animate={{
