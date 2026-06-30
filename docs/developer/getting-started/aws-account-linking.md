@@ -72,7 +72,7 @@ To perform discovery without mutating customer infrastructure, the role requires
 
 ## 6. Linking Workflow
 
-![Account Linking Workflow](../image-2.png)
+![Account Linking Workflow](../getting-started/image-2.png)
 
 ## 7. Backend Processing
 The core linking logic is implemented in the FastAPI backend:
