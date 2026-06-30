@@ -12,7 +12,6 @@ const lenses = [
   { id: 'structural', label: 'Structural', icon: GraphIcon },
   { id: 'blast-radius', label: 'Blast Radius', icon: PlanetIcon },
   { id: 'cost', label: 'Cost Topology', icon: CurrencyDollarIcon },
-  { id: 'security', label: 'Security Posture', icon: ShieldCheckIcon },
 ] as const;
 
 export default function LensToolbar({
