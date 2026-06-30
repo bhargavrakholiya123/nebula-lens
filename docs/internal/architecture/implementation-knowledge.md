@@ -20,6 +20,7 @@ This document catalogs critical business rules, architectural constraints, hidde
 *   **Hidden Assumption:** The system filters all topology and drift detection diffs against a hardcoded array of supported services (e.g., `{"vpc", "ec2", "lambda", "rds", ...}`).
 *   **Known Bug / Tech Debt Risk:** If a developer adds a new scanner (e.g., `route53_scanner.py`) to the orchestrator but forgets to add the string `"route53"` to this specific set, the resources will be scanned and saved to the database, but will be silently dropped from all UI graphs and will never trigger drift detection alerts.
 
+
 ## 4. Deterministic Hash Diffing Strategy
 **Location:** `backend/app/engines/normalizer.py`
 *   **Business Rule:** The system detects infrastructure modifications ("drift") entirely by comparing SHA-256 hashes.
