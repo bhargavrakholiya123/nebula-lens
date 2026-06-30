@@ -9,8 +9,8 @@
         "y": 0
       },
       "style": {
-        "width": 900,
-        "height": 520
+        "width": 1250,
+        "height": 760
       },
       "data": {
         "name": "Production VPC",
@@ -41,12 +41,12 @@
       "parentId": "vpc-main",
       "extent": "parent",
       "position": {
-        "x": 25,
+        "x": 40,
         "y": 40
       },
       "style": {
-        "width": 850,
-        "height": 450
+        "width": 1160,
+        "height": 670
       },
       "data": {
         "name": "ap-south-1a",
@@ -66,12 +66,12 @@
       "parentId": "az-1a",
       "extent": "parent",
       "position": {
-        "x": 25,
-        "y": 40
+        "x": 40,
+        "y": 70
       },
       "style": {
-        "width": 800,
-        "height": 380
+        "width": 1040,
+        "height": 520
       },
       "data": {
         "name": "Private Compute Subnet",
@@ -98,8 +98,8 @@
       "id": "api-gateway-ingress",
       "type": "apiGatewayNode",
       "position": {
-        "x": -315,
-        "y": 250
+        "x": -420,
+        "y": 260
       },
       "data": {
         "name": "Client API Gateway",
@@ -160,8 +160,8 @@
       "parentId": "subnet-private",
       "extent": "parent",
       "position": {
-        "x": 7,
-        "y": 240
+        "x": 360,
+        "y": 220
       },
       "data": {
         "name": "Job Processing Queue",
@@ -216,8 +216,8 @@
       "parentId": "subnet-private",
       "extent": "parent",
       "position": {
-        "x": 300,
-        "y": 10
+        "x": 620,
+        "y": 60
       },
       "data": {
         "name": "Data Processor",
@@ -279,8 +279,8 @@
       "parentId": "subnet-private",
       "extent": "parent",
       "position": {
-        "x": 590,
-        "y": 240
+        "x": 700,
+        "y": 390
       },
       "data": {
         "name": "MongoDB Atlas",
@@ -339,8 +339,8 @@
       "id": "s3-asset-bucket",
       "type": "s3Node",
       "position": {
-        "x": 950,
-        "y": 250
+        "x": 1030,
+        "y": 420
       },
       "data": {
         "name": "Asset Storage",
@@ -398,8 +398,8 @@
       "id": "iam-role-main",
       "type": "iamRoleNode",
       "position": {
-        "x": 400,
-        "y": -200
+        "x": 260,
+        "y": -170
       },
       "data": {
         "name": "ECS Execution Role",
@@ -415,8 +415,8 @@
       "parentId": "vpc-main",
       "extent": "parent",
       "position": {
-        "x": 50,
-        "y": 150
+        "x": 40,
+        "y": 120
       },
       "data": {
         "name": "Web Security Group",
@@ -432,8 +432,8 @@
       "parentId": "subnet-private",
       "extent": "parent",
       "position": {
-        "x": 100,
-        "y": 150
+        "x": 70,
+        "y": 220
       },
       "data": {
         "name": "Web Interface",
@@ -448,8 +448,8 @@
       "parentId": "vpc-main",
       "extent": "parent",
       "position": {
-        "x": -100,
-        "y": 50
+        "x": 30,
+        "y": 260
       },
       "data": {
         "name": "External ALB",
@@ -463,8 +463,8 @@
       "id": "sns-topic",
       "type": "snsNode",
       "position": {
-        "x": -200,
-        "y": 350
+        "x": -420,
+        "y": 520
       },
       "data": {
         "name": "Alerts Topic",
@@ -477,8 +477,8 @@
       "id": "event-bridge-rule",
       "type": "eventBridgeNode",
       "position": {
-        "x": 100,
-        "y": -150
+        "x": 30,
+        "y": -170
       },
       "data": {
         "name": "Daily Schedule",
@@ -491,8 +491,8 @@
       "id": "dynamodb-table",
       "type": "dynamoDbNode",
       "position": {
-        "x": 800,
-        "y": 100
+        "x": 1030,
+        "y": 120
       },
       "data": {
         "name": "Session Store",
@@ -507,8 +507,8 @@
       "parentId": "subnet-private",
       "extent": "parent",
       "position": {
-        "x": 400,
-        "y": 300
+        "x": 320,
+        "y": 390
       },
       "data": {
         "name": "Primary Database",
@@ -523,8 +523,8 @@
       "parentId": "subnet-private",
       "extent": "parent",
       "position": {
-        "x": 200,
-        "y": 100
+        "x": 220,
+        "y": 60
       },
       "data": {
         "name": "Web API",
@@ -539,8 +539,8 @@
       "parentId": "vpc-main",
       "extent": "parent",
       "position": {
-        "x": 600,
-        "y": 50
+        "x": 930,
+        "y": 120
       },
       "data": {
         "name": "Compute Cluster",
@@ -553,8 +553,8 @@
       "id": "cloudfront-dist",
       "type": "cloudFrontNode",
       "position": {
-        "x": -500,
-        "y": 50
+        "x": -650,
+        "y": 260
       },
       "data": {
         "name": "Global CDN",
@@ -567,8 +567,8 @@
       "id": "step-functions-sm",
       "type": "stepFunctionsNode",
       "position": {
-        "x": -50,
-        "y": -200
+        "x": -200,
+        "y": -170
       },
       "data": {
         "name": "Order Workflow",
@@ -581,8 +581,8 @@
       "id": "secrets-manager-secret",
       "type": "secretsManagerNode",
       "position": {
-        "x": 600,
-        "y": -150
+        "x": 560,
+        "y": -170
       },
       "data": {
         "name": "DB Credentials",
