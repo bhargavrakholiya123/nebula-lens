@@ -20,16 +20,7 @@ import {
 
 const navigationItems: NavMainItem[] = [
   { title: "Overview", id: "overview", icon: SquaresFour },
-  {
-    title: "Infrastructure Canvas",
-    icon: TreeStructure,
-    items: [
-      { title: "Structural View", id: "canvas" },
-      { title: "Blast Radius", id: "blast-radius" },
-      { title: "Cost Topology", id: "cost" },
-      { title: "Security Posture", id: "alerts" },
-    ],
-  },
+  { title: "Infrastructure Canvas", id: "canvas", icon: TreeStructure },
   { title: "Timeline Scrubber", id: "timeline", icon: Clock },
   { title: "Database Explorer", id: "db-explorer", icon: Scroll },
   { title: "Scan Job Logs", id: "logs", icon: Terminal },
