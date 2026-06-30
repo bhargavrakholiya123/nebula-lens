@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import TopNav from './TopNav';
 import { Atom } from '@phosphor-icons/react';
 
 // Dummy node positions to mirror a typical layout
@@ -23,8 +22,7 @@ const skeletonEdges = [
 
 export default function CanvasSkeleton() {
   return (
-    <div className="flex flex-col w-full h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden">
-      <TopNav />
+    <div className="flex flex-col w-full h-full bg-slate-50 dark:bg-slate-950 overflow-hidden">
       <div className="flex-1 relative w-full h-full">
         {/* Mock React Flow Canvas Area */}
         <div className="flex-1 h-full relative pr-[320px] bg-slate-50 dark:bg-slate-950 overflow-hidden">
