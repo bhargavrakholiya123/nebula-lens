@@ -90,6 +90,9 @@ export const useDashboardStore = create<DashboardState>()(
     {
       name: "gl-dashboard-store",
       version: 1, // Bump version to clear old cached 'awsRegion'
+      migrate: (persistedState: any, version: number) => {
+        return persistedState;
+      },
       partialize: (s) => ({
         leftPanelOpen: s.leftPanelOpen,
         rightPanelOpen: s.rightPanelOpen,
