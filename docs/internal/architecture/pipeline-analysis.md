@@ -2,9 +2,11 @@
 
 ## Overview
 
-This document traces the complete lifecycle of cloud infrastructure data in the application, detailing every stage from the initial user import trigger down to the visual rendering of the topology on the frontend canvas. 
+This document traces the complete lifecycle of cloud infrastructure data in the application, detailing every stage from the initial user import trigger down to the visual rendering of the topology on the frontend canvas.
 
 ## Workflow
+
+![pipeline analysis](image-1.png)
 
 ### Stage 1: Cloud Import Initiation (Triggering)
 
@@ -32,9 +34,9 @@ A background worker detects the pending `ScanJob` and begins the heavy lifting o
 *   **Transformation**: Sequentially loops through an array of `SCAN_REGIONS` (e.g., `ap-south-1`, `us-east-1`). It groups results from distinct service scanners into massive unified `nodes` and `edges` arrays.
 *   **Files involved**: `backend/app/engines/scan_orchestrator.py`, `backend/app/services/aws_service.py`.
 *   **Classes involved**: `ScanOrchestrator`, `aws_service`.
-*   **Database interaction**: 
-    * Updates `ScanJob` status to `running` and sets `started_at`. 
-    * Fetches `role_arn` from `AwsAccount`. 
+*   **Database interaction**:
+    * Updates `ScanJob` status to `running` and sets `started_at`.
+    * Fetches `role_arn` from `AwsAccount`.
     * Inserts `ServiceScan` audit records for every service (e.g., VPC, EC2, RDS) per region to track micro-status.
     * Updates `ScanJob` to `success`, `partial`, or `failed` upon completion.
 *   **API interaction**: Calls AWS STS via `_get_temp_credentials(role_arn)` to assume the target AWS account role.
@@ -95,7 +97,7 @@ The pipeline saves the complete graph into an immutable snapshot and calculates 
     3. **Drift Detection (Diffing)**: Compares the SHA-256 fingerprint of new nodes against the prior snapshot's fingerprints to determine Added, Removed, or Modified states.
 *   **Files involved**: `backend/app/engines/snapshot_engine.py`, `backend/app/engines/cost_engine.py`.
 *   **Classes involved**: `SnapshotEngine`, `CostEngine`.
-*   **Database interaction**: 
+*   **Database interaction**:
     * Queries previous snapshot for version bumping.
     * Inserts new `Snapshot` header.
     * Iteratively bulk-inserts `Resource` rows (the nodes) and `Relationship` rows (the edges).
@@ -133,7 +135,7 @@ The sanitized graph is fed into the rendering engine, converting abstract JSON i
 
 *   **Input**: The sanitized `cleanNodes` and `cleanEdges` state arrays.
 *   **Output**: A visually rendered Directed Acyclic Graph (DAG) with nested parent-child clusters.
-*   **Transformation**: 
+*   **Transformation**:
     1. Nodes are passed into an Auto Layout engine (ELK.js or a gravity simulation).
     2. The Layout Engine calculates the absolute `x` and `y` Cartesian coordinates based on hierarchical depth and edge tension.
     3. The application triggers a transition animation (`animateTransition`) to smoothly glide nodes from their default `(0,0)` positions to their computed layout positions.

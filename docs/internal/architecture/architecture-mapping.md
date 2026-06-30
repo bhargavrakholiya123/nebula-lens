@@ -5,6 +5,8 @@ The platform is a monolith-style web application separated into a Next.js fronte
 
 ## Components
 
+![architecture mapping](image.png)
+
 ### Discovery Pipeline (`backend/app/engines/scan_orchestrator.py`, `backend/app/scanners/`)
 *   **Purpose**: Discovers and extracts AWS cloud assets across multiple regions.
 *   **Responsibilities**: Manages the lifecycle of a `ScanJob`. Orchestrates region-based parallel scanning, assumes IAM roles using AWS STS, catches and logs failures per service, and aggregates all raw resources into a unified format.
@@ -52,7 +54,7 @@ The platform is a monolith-style web application separated into a Next.js fronte
 
 ### Authentication (`backend/app/services/aws_service.py`, `backend/app/models/models.py`)
 *   **Purpose**: Secures user access to the dashboard and authorizes the backend to scan customer AWS accounts.
-*   **Responsibilities**: 
+*   **Responsibilities**:
     1. **User Identity:** Maps Auth0 identities to local users via the `auth0_id` column in the `users` table.
     2. **AWS Identity:** Handles cross-account access via `AssumeRole` using an `ExternalId` (`AWSService.verify_role_arn`).
 *   **Dependencies**: AWS STS (`boto3`), Auth0 (Frontend client).

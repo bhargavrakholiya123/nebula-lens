@@ -23,6 +23,9 @@ All relevant files reside in:
 *   `Scanner.scan(credentials, region, account_id, subnet_map)`: A standard interface implemented by each scanner. It paginates Boto3 results, delegates payload formatting to `normalizer.normalize_<service>`, and emits hierarchical structural edges (e.g., `Subnet → hosts → EC2`).
 
 ### Workflow
+
+![discovery pipeline](image.png)
+
 1.  **Initialization:** The scheduler picks up a `ScanJob` in `pending` status and invokes `ScanOrchestrator.run_scan()`.
 2.  **Authentication:** The orchestrator fetches temporary AWS credentials using STS (`aws_service.py`).
 3.  **Region Loop:** The orchestrator iterates over a predefined list of target regions.
