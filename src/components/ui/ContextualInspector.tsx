@@ -291,20 +291,23 @@ export default function ContextualInspector() {
             </div>
 
             {/* Tabs */}
-            <div className="flex px-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#111111] shrink-0">
+            <div className="flex flex-wrap items-stretch gap-y-1 px-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#111111] shrink-0">
               {TABS.map((tab) => (
                 <button
                   key={tab}
                   onClick={(e) => { e.stopPropagation(); setActiveTab(tab); }}
-                  className={`relative px-3 py-3 text-sm font-medium tracking-[0.7px] uppercase transition-colors ${activeTab === tab ? 'text-[var(--gl-text-primary)]' : 'text-[var(--gl-text-muted)] hover:text-slate-600 dark:hover:text-slate-300'
-                    }`}
+                  className={`relative flex-1 min-w-[90px] px-2 py-3 text-xs sm:text-sm font-medium tracking-[0.7px] uppercase transition-colors text-center ${
+                    activeTab === tab ? 'text-[var(--gl-text-primary)]' : 'text-[var(--gl-text-muted)] hover:text-slate-600 dark:hover:text-slate-300'
+                  }`}
                 >
-                  {tab}
+                  <span className="block whitespace-normal break-words" title={tab}>
+                    {tab}
+                  </span>
                   {activeTab === tab && (
                     <motion.div
                       layoutId="tab-indicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500 rounded-full"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
                 </button>
