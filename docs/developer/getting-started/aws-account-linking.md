@@ -21,7 +21,7 @@ The customer must create an IAM role specifically for GravityLens to assume.
 
 ### Step-by-Step Console Guide:
 1. **Navigate to IAM**: Log in to the AWS Management Console, open the **IAM Console**, navigate to **Roles**, and click **Create role**.
-2. **Select Trusted Entity**: 
+2. **Select Trusted Entity**:
    - Select **AWS account** as the trusted entity type.
    - Under the **An AWS account** section, select the option **Another AWS account** (since GravityLens assumes the role from its central AWS account).
    - Enter the central GravityLens AWS Account ID (provided during onboarding).
@@ -33,8 +33,8 @@ The customer must create an IAM role specifically for GravityLens to assume.
    - **Session Duration**: Standard 1-hour STS session duration (default).
    - Click **Create role**.
 
-> [!NOTE] 
-> **Regarding AWS Account ID `618642320905`**: 
+> [!NOTE]
+> **Regarding AWS Account ID `618642320905`**:
 > You may notice this Account ID in frontend placeholders (e.g., `SettingsPage.tsx`) and mock architecture files (`architecture.json`). This ID is used strictly for **UI illustration and mocked testing**; it is not a hardcoded dependency in the production authentication flow. In production, this value is replaced by the customer's actual AWS Account ID or the central GravityLens AWS Account ID depending on the context.
 
 ## 4. Trust Policy (AssumeRole Policy)
@@ -72,7 +72,7 @@ To perform discovery without mutating customer infrastructure, the role requires
 
 ## 6. Linking Workflow
 
-![Account Linking Workflow](../image-2.png)
+![account linking workflow](image.png)
 
 ## 7. Backend Processing
 The core linking logic is implemented in the FastAPI backend:
@@ -84,7 +84,7 @@ The core linking logic is implemented in the FastAPI backend:
 1. **Verification**: The API receives the Role ARN and passes it to `aws_service.verify_role_arn()`.
 2. **STS Assume Role**: The backend instantiates an STS client and calls `assume_role(RoleArn, RoleSessionName="GravityLensVerification")`.
 3. **Identity Confirmation**: Using the returned temporary credentials, it calls `get_caller_identity()` to reliably extract the customer's AWS Account ID.
-4. **Database Registration**: 
+4. **Database Registration**:
    - Queries `AwsAccount` to prevent duplicate linkages.
    - If unique, creates a new `AwsAccount` record associating the `account_id`, `role_arn`, and the `user_id`.
 5. **Scan Trigger**: An initial `ScanJob` is inserted with `status=pending` and `triggered_by="initial_connect"`, allowing the asynchronous discovery pipeline to pick it up.
