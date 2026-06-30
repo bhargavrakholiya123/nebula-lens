@@ -1,38 +1,16 @@
 {
-  "notes": "this is fallback data for testing purpose original data feched from src/app/api/infrastructure/route.ts",
   "nodes": [
     {
       "id": "vpc-main",
       "type": "VPC",
-      "position": {
-        "x": 0,
-        "y": 0
-      },
-      "style": {
-        "width": 1250,
-        "height": 760
-      },
+      "parentId": null,
+      "position": { "x": 0, "y": 0 },
+      "style": { "width": 900, "height": 520 },
       "data": {
         "name": "Production VPC",
         "insights": "Flow logs enabled.",
-        "metrics": {
-          "cidrBlock": "10.0.0.0/16",
-          "region": "ap-south-1",
-          "estMonthlyCost": 420
-        },
-        "telemetryData": [
-          {
-            "time": "08:00",
-            "natTrafficGB": 12
-          },
-          {
-            "time": "08:15",
-            "natTrafficGB": 15
-          }
-        ]
-      },
-      "networkMeta": {
-        "vpcId": "vpc-main"
+        "metrics": { "cidrBlock": "10.0.0.0/16", "region": "ap-south-1", "estMonthlyCost": 420 },
+        "telemetryData": [{ "time": "08:00", "natTrafficGB": 12 }, { "time": "08:15", "natTrafficGB": 15 }]
       }
     },
     {
@@ -40,24 +18,12 @@
       "type": "AvailabilityZone",
       "parentId": "vpc-main",
       "extent": "parent",
-      "position": {
-        "x": 40,
-        "y": 40
-      },
-      "style": {
-        "width": 1160,
-        "height": 670
-      },
+      "position": { "x": 25, "y": 40 },
+      "style": { "width": 850, "height": 450 },
       "data": {
         "name": "ap-south-1a",
         "insights": "Physical Data Center boundaries.",
-        "metrics": {
-          "status": "Operational",
-          "powerGrid": "Stable"
-        }
-      },
-      "networkMeta": {
-        "vpcId": "vpc-main"
+        "metrics": { "status": "Operational", "powerGrid": "Stable" }
       }
     },
     {
@@ -65,42 +31,19 @@
       "type": "Subnet",
       "parentId": "az-1a",
       "extent": "parent",
-      "position": {
-        "x": 40,
-        "y": 70
-      },
-      "style": {
-        "width": 1040,
-        "height": 520
-      },
+      "position": { "x": 25, "y": 40 },
+      "style": { "width": 800, "height": 380 },
       "data": {
         "name": "Private Compute Subnet",
-        "metrics": {
-          "cidrBlock": "10.0.1.0/24",
-          "estMonthlyCost": 180
-        },
-        "telemetryData": [
-          {
-            "time": "08:00",
-            "dataTransferIn": 45
-          },
-          {
-            "time": "08:15",
-            "dataTransferIn": 50
-          }
-        ]
-      },
-      "networkMeta": {
-        "vpcId": "vpc-main"
+        "metrics": { "cidrBlock": "10.0.1.0/24", "estMonthlyCost": 180 },
+        "telemetryData": [{ "time": "08:00", "dataTransferIn": 45 }, { "time": "08:15", "dataTransferIn": 50 }]
       }
     },
     {
       "id": "api-gateway-ingress",
       "type": "apiGatewayNode",
-      "position": {
-        "x": -420,
-        "y": 260
-      },
+      "parentId": null,
+      "position": { "x": -315, "y": 250 },
       "data": {
         "name": "Client API Gateway",
         "status": "healthy",
@@ -118,40 +61,13 @@
           "estMonthlyCost": 45
         },
         "telemetryData": [
-          {
-            "time": "08:00",
-            "requests": 850,
-            "latency": 35
-          },
-          {
-            "time": "08:15",
-            "requests": 920,
-            "latency": 38
-          },
-          {
-            "time": "08:30",
-            "requests": 1050,
-            "latency": 42
-          },
-          {
-            "time": "08:45",
-            "requests": 1100,
-            "latency": 44
-          },
-          {
-            "time": "09:00",
-            "requests": 1800,
-            "latency": 65
-          },
-          {
-            "time": "09:15",
-            "requests": 1200,
-            "latency": 45
-          }
+          { "time": "08:00", "requests": 850, "latency": 35 },
+          { "time": "08:15", "requests": 920, "latency": 38 },
+          { "time": "08:30", "requests": 1050, "latency": 42 },
+          { "time": "08:45", "requests": 1100, "latency": 44 },
+          { "time": "09:00", "requests": 1800, "latency": 65 },
+          { "time": "09:15", "requests": 1200, "latency": 45 }
         ]
-      },
-      "networkMeta": {
-        "vpcId": "vpc-main"
       }
     },
     {
@@ -159,10 +75,7 @@
       "type": "sqsNode",
       "parentId": "subnet-private",
       "extent": "parent",
-      "position": {
-        "x": 360,
-        "y": 220
-      },
+      "position": { "x": 7, "y": 240 },
       "data": {
         "name": "Job Processing Queue",
         "status": "healthy",
@@ -180,34 +93,13 @@
           "estMonthlyCost": 12
         },
         "telemetryData": [
-          {
-            "time": "08:00",
-            "messages": 2
-          },
-          {
-            "time": "08:15",
-            "messages": 5
-          },
-          {
-            "time": "08:30",
-            "messages": 12
-          },
-          {
-            "time": "08:45",
-            "messages": 8
-          },
-          {
-            "time": "09:00",
-            "messages": 45
-          },
-          {
-            "time": "09:15",
-            "messages": 14
-          }
+          { "time": "08:00", "messages": 2 },
+          { "time": "08:15", "messages": 5 },
+          { "time": "08:30", "messages": 12 },
+          { "time": "08:45", "messages": 8 },
+          { "time": "09:00", "messages": 45 },
+          { "time": "09:15", "messages": 14 }
         ]
-      },
-      "networkMeta": {
-        "vpcId": "vpc-main"
       }
     },
     {
@@ -215,10 +107,7 @@
       "type": "lambdaNode",
       "parentId": "subnet-private",
       "extent": "parent",
-      "position": {
-        "x": 620,
-        "y": 60
-      },
+      "position": { "x": 300, "y": 10 },
       "data": {
         "name": "Data Processor",
         "status": "warning",
@@ -237,40 +126,13 @@
           "estMonthlyCost": 320
         },
         "telemetryData": [
-          {
-            "time": "08:00",
-            "cpu": 45,
-            "memory": 510
-          },
-          {
-            "time": "08:15",
-            "cpu": 48,
-            "memory": 580
-          },
-          {
-            "time": "08:30",
-            "cpu": 52,
-            "memory": 620
-          },
-          {
-            "time": "08:45",
-            "cpu": 55,
-            "memory": 750
-          },
-          {
-            "time": "09:00",
-            "cpu": 85,
-            "memory": 980
-          },
-          {
-            "time": "09:15",
-            "cpu": 60,
-            "memory": 890
-          }
+          { "time": "08:00", "cpu": 45, "memory": 510 },
+          { "time": "08:15", "cpu": 48, "memory": 580 },
+          { "time": "08:30", "cpu": 52, "memory": 620 },
+          { "time": "08:45", "cpu": 55, "memory": 750 },
+          { "time": "09:00", "cpu": 85, "memory": 980 },
+          { "time": "09:15", "cpu": 60, "memory": 890 }
         ]
-      },
-      "networkMeta": {
-        "vpcId": "vpc-main"
       }
     },
     {
@@ -278,10 +140,7 @@
       "type": "databaseNode",
       "parentId": "subnet-private",
       "extent": "parent",
-      "position": {
-        "x": 700,
-        "y": 390
-      },
+      "position": { "x": 590, "y": 240 },
       "data": {
         "name": "MongoDB Atlas",
         "status": "healthy",
@@ -299,49 +158,20 @@
           "estMonthlyCost": 850
         },
         "telemetryData": [
-          {
-            "time": "08:00",
-            "connections": 120,
-            "iops": 400
-          },
-          {
-            "time": "08:15",
-            "connections": 125,
-            "iops": 420
-          },
-          {
-            "time": "08:30",
-            "connections": 130,
-            "iops": 450
-          },
-          {
-            "time": "08:45",
-            "connections": 135,
-            "iops": 480
-          },
-          {
-            "time": "09:00",
-            "connections": 210,
-            "iops": 1200
-          },
-          {
-            "time": "09:15",
-            "connections": 142,
-            "iops": 650
-          }
+          { "time": "08:00", "connections": 120, "iops": 400 },
+          { "time": "08:15", "connections": 125, "iops": 420 },
+          { "time": "08:30", "connections": 130, "iops": 450 },
+          { "time": "08:45", "connections": 135, "iops": 480 },
+          { "time": "09:00", "connections": 210, "iops": 1200 },
+          { "time": "09:15", "connections": 142, "iops": 650 }
         ]
-      },
-      "networkMeta": {
-        "vpcId": "vpc-main"
       }
     },
     {
       "id": "s3-asset-bucket",
       "type": "s3Node",
-      "position": {
-        "x": 1030,
-        "y": 420
-      },
+      "parentId": null,
+      "position": { "x": 950, "y": 250 },
       "data": {
         "name": "Asset Storage",
         "status": "healthy",
@@ -358,237 +188,13 @@
           "estMonthlyCost": 140
         },
         "telemetryData": [
-          {
-            "time": "08:00",
-            "readOps": 1200,
-            "writeOps": 40
-          },
-          {
-            "time": "08:15",
-            "readOps": 1250,
-            "writeOps": 45
-          },
-          {
-            "time": "08:30",
-            "readOps": 1300,
-            "writeOps": 50
-          },
-          {
-            "time": "08:45",
-            "readOps": 1350,
-            "writeOps": 55
-          },
-          {
-            "time": "09:00",
-            "readOps": 2500,
-            "writeOps": 300
-          },
-          {
-            "time": "09:15",
-            "readOps": 1400,
-            "writeOps": 60
-          }
+          { "time": "08:00", "readOps": 1200, "writeOps": 40 },
+          { "time": "08:15", "readOps": 1250, "writeOps": 45 },
+          { "time": "08:30", "readOps": 1300, "writeOps": 50 },
+          { "time": "08:45", "readOps": 1350, "writeOps": 55 },
+          { "time": "09:00", "readOps": 2500, "writeOps": 300 },
+          { "time": "09:15", "readOps": 1400, "writeOps": 60 }
         ]
-      },
-      "networkMeta": {
-        "vpcId": "vpc-main"
-      }
-    },
-    {
-      "id": "iam-role-main",
-      "type": "iamRoleNode",
-      "position": {
-        "x": 260,
-        "y": -170
-      },
-      "data": {
-        "name": "ECS Execution Role",
-        "insights": "Least privilege applied",
-        "metrics": {
-          "estMonthlyCost": 0
-        }
-      }
-    },
-    {
-      "id": "sg-web",
-      "type": "securityGroupNode",
-      "parentId": "vpc-main",
-      "extent": "parent",
-      "position": {
-        "x": 40,
-        "y": 120
-      },
-      "data": {
-        "name": "Web Security Group",
-        "insights": "Port 80/443 open",
-        "metrics": {
-          "estMonthlyCost": 0
-        }
-      }
-    },
-    {
-      "id": "eni-web",
-      "type": "eniNode",
-      "parentId": "subnet-private",
-      "extent": "parent",
-      "position": {
-        "x": 70,
-        "y": 220
-      },
-      "data": {
-        "name": "Web Interface",
-        "metrics": {
-          "estMonthlyCost": 0
-        }
-      }
-    },
-    {
-      "id": "alb-main",
-      "type": "albNode",
-      "parentId": "vpc-main",
-      "extent": "parent",
-      "position": {
-        "x": 30,
-        "y": 260
-      },
-      "data": {
-        "name": "External ALB",
-        "insights": "WAF attached",
-        "metrics": {
-          "estMonthlyCost": 45
-        }
-      }
-    },
-    {
-      "id": "sns-topic",
-      "type": "snsNode",
-      "position": {
-        "x": -420,
-        "y": 520
-      },
-      "data": {
-        "name": "Alerts Topic",
-        "metrics": {
-          "estMonthlyCost": 2
-        }
-      }
-    },
-    {
-      "id": "event-bridge-rule",
-      "type": "eventBridgeNode",
-      "position": {
-        "x": 30,
-        "y": -170
-      },
-      "data": {
-        "name": "Daily Schedule",
-        "metrics": {
-          "estMonthlyCost": 1
-        }
-      }
-    },
-    {
-      "id": "dynamodb-table",
-      "type": "dynamoDbNode",
-      "position": {
-        "x": 1030,
-        "y": 120
-      },
-      "data": {
-        "name": "Session Store",
-        "metrics": {
-          "estMonthlyCost": 25
-        }
-      }
-    },
-    {
-      "id": "rds-instance",
-      "type": "rdsNode",
-      "parentId": "subnet-private",
-      "extent": "parent",
-      "position": {
-        "x": 320,
-        "y": 390
-      },
-      "data": {
-        "name": "Primary Database",
-        "metrics": {
-          "estMonthlyCost": 120
-        }
-      }
-    },
-    {
-      "id": "ecs-service",
-      "type": "ecsNode",
-      "parentId": "subnet-private",
-      "extent": "parent",
-      "position": {
-        "x": 220,
-        "y": 60
-      },
-      "data": {
-        "name": "Web API",
-        "metrics": {
-          "estMonthlyCost": 65
-        }
-      }
-    },
-    {
-      "id": "eks-cluster",
-      "type": "eksNode",
-      "parentId": "vpc-main",
-      "extent": "parent",
-      "position": {
-        "x": 930,
-        "y": 120
-      },
-      "data": {
-        "name": "Compute Cluster",
-        "metrics": {
-          "estMonthlyCost": 350
-        }
-      }
-    },
-    {
-      "id": "cloudfront-dist",
-      "type": "cloudFrontNode",
-      "position": {
-        "x": -650,
-        "y": 260
-      },
-      "data": {
-        "name": "Global CDN",
-        "metrics": {
-          "estMonthlyCost": 85
-        }
-      }
-    },
-    {
-      "id": "step-functions-sm",
-      "type": "stepFunctionsNode",
-      "position": {
-        "x": -200,
-        "y": -170
-      },
-      "data": {
-        "name": "Order Workflow",
-        "metrics": {
-          "estMonthlyCost": 15
-        }
-      }
-    },
-    {
-      "id": "secrets-manager-secret",
-      "type": "secretsManagerNode",
-      "position": {
-        "x": 560,
-        "y": -170
-      },
-      "data": {
-        "name": "DB Credentials",
-        "metrics": {
-          "estMonthlyCost": 5
-        }
       }
     }
   ],
@@ -598,256 +204,32 @@
       "source": "api-gateway-ingress",
       "target": "sqs-job-queue",
       "type": "animatedEdge",
-      "data": {
-        "label": "POST /jobs",
-        "category": "runtime"
-      },
-      "networkMeta": {
-        "direction": "outbound",
-        "protocol": "TCP"
-      }
+      "label": "POST /jobs",
+      "data": { "transferCost": 4 }
     },
     {
       "id": "edge-sqs-to-lambda",
       "source": "sqs-job-queue",
       "target": "lambda-processor",
       "type": "animatedEdge",
-      "data": {
-        "label": "Triggers Event",
-        "category": "runtime"
-      },
-      "networkMeta": {
-        "direction": "outbound",
-        "protocol": "TCP"
-      }
+      "label": "Triggers Event",
+      "data": { "transferCost": 12 }
     },
     {
       "id": "edge-lambda-to-db",
       "source": "lambda-processor",
       "target": "db-mongo-cluster",
       "type": "animatedEdge",
-      "data": {
-        "label": "Reads/Writes State",
-        "category": "runtime"
-      },
-      "networkMeta": {
-        "direction": "outbound",
-        "protocol": "TCP"
-      }
+      "label": "Reads/Writes State",
+      "data": { "transferCost": 145 }
     },
     {
       "id": "edge-lambda-to-s3",
       "source": "lambda-processor",
       "target": "s3-asset-bucket",
       "type": "animatedEdge",
-      "data": {
-        "label": "Stores Assets",
-        "category": "runtime"
-      },
-      "networkMeta": {
-        "direction": "outbound",
-        "protocol": "TCP"
-      }
-    },
-    {
-      "id": "edge-iam-ecs",
-      "source": "iam-role-main",
-      "target": "ecs-service",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Assumes Role",
-        "category": "iam_permission"
-      }
-    },
-    {
-      "id": "edge-iam-eks",
-      "source": "iam-role-main",
-      "target": "eks-cluster",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Assumes Role",
-        "category": "iam_permission"
-      }
-    },
-    {
-      "id": "edge-iam-lambda",
-      "source": "iam-role-main",
-      "target": "lambda-processor",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Assumes Role",
-        "category": "iam_permission"
-      }
-    },
-    {
-      "id": "edge-iam-sf",
-      "source": "iam-role-main",
-      "target": "step-functions-sm",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Assumes Role",
-        "category": "iam_permission"
-      }
-    },
-    {
-      "id": "edge-sg-ecs",
-      "source": "sg-web",
-      "target": "ecs-service",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Secures",
-        "category": "runtime"
-      }
-    },
-    {
-      "id": "edge-sg-alb",
-      "source": "sg-web",
-      "target": "alb-main",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Secures",
-        "category": "runtime"
-      }
-    },
-    {
-      "id": "edge-eni-ecs",
-      "source": "eni-web",
-      "target": "ecs-service",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Attached To",
-        "category": "runtime"
-      }
-    },
-    {
-      "id": "edge-cf-alb",
-      "source": "cloudfront-dist",
-      "target": "alb-main",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Forwards To",
-        "category": "runtime"
-      }
-    },
-    {
-      "id": "edge-cf-api",
-      "source": "cloudfront-dist",
-      "target": "api-gateway-ingress",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Forwards To",
-        "category": "runtime"
-      }
-    },
-    {
-      "id": "edge-alb-ecs",
-      "source": "alb-main",
-      "target": "ecs-service",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Routes Traffic",
-        "category": "runtime"
-      }
-    },
-    {
-      "id": "edge-sns-sqs",
-      "source": "sns-topic",
-      "target": "sqs-job-queue",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Publishes",
-        "category": "runtime"
-      }
-    },
-    {
-      "id": "edge-eb-lambda",
-      "source": "event-bridge-rule",
-      "target": "lambda-processor",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Triggers",
-        "category": "runtime"
-      }
-    },
-    {
-      "id": "edge-eb-sf",
-      "source": "event-bridge-rule",
-      "target": "step-functions-sm",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Triggers",
-        "category": "runtime"
-      }
-    },
-    {
-      "id": "edge-ecs-dynamo",
-      "source": "ecs-service",
-      "target": "dynamodb-table",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Reads/Writes",
-        "category": "runtime"
-      }
-    },
-    {
-      "id": "edge-ecs-rds",
-      "source": "ecs-service",
-      "target": "rds-instance",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Reads/Writes",
-        "category": "runtime"
-      }
-    },
-    {
-      "id": "edge-eks-rds",
-      "source": "eks-cluster",
-      "target": "rds-instance",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Reads/Writes",
-        "category": "runtime"
-      }
-    },
-    {
-      "id": "edge-sf-lambda",
-      "source": "step-functions-sm",
-      "target": "lambda-processor",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Invokes",
-        "category": "runtime"
-      }
-    },
-    {
-      "id": "edge-sf-sns",
-      "source": "step-functions-sm",
-      "target": "sns-topic",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Publishes",
-        "category": "runtime"
-      }
-    },
-    {
-      "id": "edge-sm-ecs",
-      "source": "secrets-manager-secret",
-      "target": "ecs-service",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Reads Secret",
-        "category": "runtime"
-      }
-    },
-    {
-      "id": "edge-sm-rds",
-      "source": "secrets-manager-secret",
-      "target": "rds-instance",
-      "type": "animatedEdge",
-      "data": {
-        "label": "Manages Creds",
-        "category": "runtime"
-      }
+      "label": "Stores Assets",
+      "data": { "transferCost": 45 }
     }
   ]
 }
