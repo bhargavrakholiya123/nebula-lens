@@ -17,28 +17,7 @@ Gravity Lens is a next-generation cloud infrastructure intelligence and cost opt
 
 ## Scan & Normalization Architecture
 
-```mermaid
-sequenceDiagram
-    participant User as Frontend / UI
-    participant Server as FastAPI Backend
-    participant Worker as Scan Scheduler / Worker
-    participant AWS as AWS Cloud API
-    database DB as PostgreSQL / SQLite
-
-    User->>Server: Trigger Scan (Account ID)
-    Server->>DB: Insert ScanJob (Status: Pending)
-    Server-->>User: Scan Queued successfully
-    Note over Worker, DB: Scheduler picks up pending jobs
-    Worker->>DB: Fetch pending ScanJobs
-    Worker->>AWS: Assume cross-account IAM Role
-    Worker->>AWS: Discover Cloud Assets (Boto3 API)
-    AWS-->>Worker: Return resource metadata
-    Worker->>DB: Save raw Resources & Relationships
-    Worker->>DB: Calculate & Save Diff (SnapshotDiff)
-    Worker->>Server: Trigger Normalization
-    Server->>DB: Process Raw Resources to Normalized Nodes/Edges
-    Server->>DB: Save Computed Graph
-```
+![workflow](image.png)
 
 ---
 
