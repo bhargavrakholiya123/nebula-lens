@@ -147,7 +147,7 @@ export default function LayerPanel() {
               {filteredLayers.length === 0 && (
                 <div className="p-6 text-center text-slate-500 dark:text-slate-400 text-sm flex flex-col items-center">
                   <EyeSlash className="w-8 h-8 mb-2 opacity-20" />
-                  No layers found matching "{searchQuery}"
+                  No layers found matching &quot;{searchQuery}&quot;
                 </div>
               )}
             </div>
