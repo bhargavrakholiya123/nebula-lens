@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, Variants, Transition } from 'framer-motion';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { springSmooth, springSnappy, scaleIn } from '../../lib/motion';
-import { GraphIcon, PlanetIcon, CurrencyDollarIcon, ShieldCheckIcon, ArrowRightIcon, ArrowLeftIcon, XIcon, PlayIcon, SparkleIcon, CursorClickIcon, PulseIcon, DownloadSimpleIcon, ArrowUUpLeftIcon, EyeIcon, ShieldIcon } from '@phosphor-icons/react';
+import { GraphIcon, PlanetIcon, CurrencyDollarIcon, ShieldCheckIcon, ArrowRightIcon, ArrowLeftIcon, XIcon, PlayIcon, SparkleIcon, CursorClickIcon, PulseIcon, DownloadSimpleIcon, ArrowUUpLeftIcon, EyeIcon, ShieldIcon, Stack, MagicWand } from '@phosphor-icons/react';
 
 // ────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -16,12 +16,12 @@ interface TourStep {
   title: string;
   description: string;
   icon: React.ElementType;
-  targetId: string | null;
+  targetId: string | null | ((nodes: any[]) => string | null);
   placement: TooltipPlacement;
   spotlightPadding?: number;
   spotlightRadius?: number;
   disableDimming?: boolean;
-  action: (store: StoreActions) => void;
+  action: (store: StoreActions, resolvedTargetId: string | null) => void;
   delay?: number;
 }
 
@@ -46,6 +46,21 @@ interface SpotlightRect {
 //   → 5. Blast Inspector → 6. Cost → 7. Cost Inspector → 8. Security
 //   → 9. Compliance → 10. Undo/Redo → 11. Export → 12. Complete
 // ────────────────────────────────────────────────────────────────────────────
+const getDbNodeId = (nodes: any[]) => {
+  const dbNode = nodes.find(n => typeof n.type === 'string' && (n.type.toLowerCase().includes('db') || n.type.toLowerCase().includes('mongo')));
+  return dbNode ? dbNode.id : (nodes[0]?.id || null);
+};
+
+const getGatewayNodeId = (nodes: any[]) => {
+  const gwNode = nodes.find(n => typeof n.type === 'string' && (n.type.toLowerCase().includes('gateway') || n.type.toLowerCase().includes('ingress')));
+  return gwNode ? gwNode.id : (nodes[0]?.id || null);
+};
+
+const getComputeNodeId = (nodes: any[]) => {
+  const computeNode = nodes.find(n => typeof n.type === 'string' && (n.type.toLowerCase().includes('lambda') || n.type.toLowerCase().includes('compute') || n.type.toLowerCase().includes('ec2')));
+  return computeNode ? computeNode.id : (nodes[0]?.id || null);
+};
+
 const TOUR_STEPS: TourStep[] = [
   {
     id: 'welcome',
@@ -77,16 +92,16 @@ const TOUR_STEPS: TourStep[] = [
   {
     id: 'mongo-node-highlight',
     title: 'Node Deep Dive',
-    description: 'We just clicked the MongoDB Atlas database node. Notice how it is selected on the canvas.',
+    description: 'We just clicked a database or compute node. Notice how it is selected on the canvas.',
     icon: CursorClickIcon,
-    targetId: 'db-mongo-cluster',
+    targetId: getDbNodeId,
     placement: 'top',
     spotlightPadding: 8,
     spotlightRadius: 12,
     delay: 400,
-    action: (store) => {
+    action: (store, resolvedTargetId) => {
       store.setActiveLens('structural');
-      store.setSelectedNodeId('db-mongo-cluster');
+      store.setSelectedNodeId(resolvedTargetId);
     }
   },
   {
@@ -101,7 +116,7 @@ const TOUR_STEPS: TourStep[] = [
     delay: 300,
     action: (store) => {
       store.setActiveLens('structural');
-      store.setSelectedNodeId('db-mongo-cluster');
+      store.setSelectedNodeId(getDbNodeId(useCanvasStore.getState().nodes));
     }
   },
   {
@@ -122,15 +137,15 @@ const TOUR_STEPS: TourStep[] = [
   {
     id: 'api-gateway-clicked',
     title: 'Simulate Failure',
-    description: 'We just selected the API Gateway as a failure point. The custom BFS algorithm instantly highlights every downstream service that would cascade into failure.',
+    description: 'We just selected a critical failure point. The custom BFS algorithm instantly highlights every downstream service that would cascade into failure.',
     icon: PlanetIcon,
-    targetId: 'canvas-viewport',
+    targetId: getGatewayNodeId,
     placement: 'right',
     spotlightPadding: 0,
     delay: 400,
-    action: (store) => {
+    action: (store, resolvedTargetId) => {
       store.setActiveLens('blast-radius');
-      store.setSelectedNodeId('api-gateway-ingress');
+      store.setSelectedNodeId(resolvedTargetId);
     }
   },
   {
@@ -145,7 +160,7 @@ const TOUR_STEPS: TourStep[] = [
     delay: 300,
     action: (store) => {
       store.setActiveLens('blast-radius');
-      store.setSelectedNodeId('api-gateway-ingress');
+      store.setSelectedNodeId(getGatewayNodeId(useCanvasStore.getState().nodes));
     }
   },
   {
@@ -165,7 +180,7 @@ const TOUR_STEPS: TourStep[] = [
   {
     id: 'cost-node-interaction',
     title: 'Cost Inspector: Node Deep Dive',
-    description: 'We just selected the Lambda Processor. The inspector shows its financial breakdown — compute, storage, and network costs as a stacked bar chart, plus AI-powered rightsizing recommendations.',
+    description: 'We just selected a compute node. The inspector shows its financial breakdown — compute, storage, and network costs as a stacked bar chart, plus AI-powered rightsizing recommendations.',
     icon: CursorClickIcon,
     targetId: 'inspector-panel',
     placement: 'left',
@@ -174,53 +189,40 @@ const TOUR_STEPS: TourStep[] = [
     delay: 500,
     action: (store) => {
       store.setActiveLens('cost');
-      store.setSelectedNodeId('lambda-processor');
+      store.setSelectedNodeId(getComputeNodeId(useCanvasStore.getState().nodes));
     }
   },
   {
-    id: 'security-lens',
-    title: 'SecOps: Security Posture',
-    description: 'The security lens audits your infrastructure for misconfigurations. Amber borders flag compliance violations, and red dashed lines trace lateral breach paths an attacker could exploit.',
-    icon: ShieldCheckIcon,
-    targetId: 'canvas-viewport',
-    placement: 'right',
-    spotlightPadding: 0,
-    delay: 400,
+    id: 'auto-layout',
+    title: 'Auto Layout',
+    description: 'Automatically arrange your canvas using our gravity-based layout engine. Perfect for untangling messy architectures instantly.',
+    icon: MagicWand,
+    targetId: 'auto-layout-button',
+    placement: 'bottom',
+    spotlightPadding: 8,
+    spotlightRadius: 16,
+    delay: 300,
     action: (store) => {
-      store.setActiveLens('security');
+      store.setActiveLens('structural');
       store.setSelectedNodeId(null);
-      store.setComplianceFramework('general');
     }
   },
   {
-    id: 'frameworks-intro',
-    title: 'Regulatory Frameworks',
-    description: 'Notice these tabs in the Global Overview? They let you switch between different compliance standards. Let\'s highlight them so you know exactly where to look.',
-    icon: ShieldIcon,
-    targetId: 'compliance-tabs',
-    placement: 'left',
-    spotlightPadding: 4,
-    delay: 400,
+    id: 'layers',
+    title: 'Layer Engine',
+    description: 'Toggle architecture layers to filter out noise or focus on specific networking and security boundaries.',
+    icon: Stack,
+    targetId: 'layer-button',
+    placement: 'bottom',
+    spotlightPadding: 8,
+    spotlightRadius: 16,
+    delay: 300,
     action: (store) => {
-      store.setActiveLens('security');
+      store.setActiveLens('structural');
       store.setSelectedNodeId(null);
-      store.setComplianceFramework('general');
     }
   },
-  {
-    id: 'compliance-frameworks',
-    title: 'Compliance Framework Switching',
-    description: 'Watch the tabs cycle through General → SOC2 → HIPAA. Each framework audits against different regulatory standards, revealing unique violations and remediation steps.',
-    icon: ShieldIcon,
-    targetId: 'compliance-tabs',
-    placement: 'left',
-    disableDimming: true,
-    spotlightPadding: 4,
-    delay: 600,
-    action: () => {
-      // Action handled by dedicated compliance cycling effect
-    }
-  },
+
   {
     id: 'undo-redo',
     title: 'Undo / Redo with Animation',
@@ -433,7 +435,11 @@ export default function ProductTour() {
   const updateSpotlight = useCallback(() => {
     const step = TOUR_STEPS[currentStep];
     if (!step) return;
-    const rect = measureTarget(step.targetId, step.spotlightPadding ?? 8);
+    
+    const nodes = useCanvasStore.getState().nodes;
+    const resolvedTargetId = typeof step.targetId === 'function' ? step.targetId(nodes) : step.targetId;
+    
+    const rect = measureTarget(resolvedTargetId, step.spotlightPadding ?? 8);
     setSpotlightRect(rect);
   }, [currentStep, measureTarget]);
 
@@ -472,8 +478,11 @@ export default function ProductTour() {
     clearComplianceTimers();
     if (stepTimerRef.current) clearTimeout(stepTimerRef.current);
 
+    const nodes = useCanvasStore.getState().nodes;
+    const resolvedTargetId = typeof step.targetId === 'function' ? step.targetId(nodes) : step.targetId;
+
     // Phase 2: Execute the state action (lens switch, node select, etc.)
-    step.action(storeActions);
+    step.action(storeActions, resolvedTargetId);
 
     // Phase 3: Wait for DOM to settle, then measure + show
     const settleDelay = step.delay ?? 250;
@@ -482,26 +491,14 @@ export default function ProductTour() {
       setPrevSpotlightRect(spotlightRect);
 
       // Measure the new target
-      const newRect = measureTarget(step.targetId, step.spotlightPadding ?? 8);
+      const newRect = measureTarget(resolvedTargetId, step.spotlightPadding ?? 8);
       setSpotlightRect(newRect);
 
       // Phase 4: Stagger the tooltip reveal slightly after spotlight moves
       setTimeout(() => setShowTooltip(true), 120);
     }, settleDelay);
 
-    // Phase 5: If compliance step, start cycling after tooltip appears
-    if (step.id === 'compliance-frameworks') {
-      const base = settleDelay + 400;
-      const t1 = setTimeout(() => {
-        setActiveLens('security');
-        setSelectedNodeId(null);
-        setComplianceFramework('general');
-      }, base);
-      const t2 = setTimeout(() => setComplianceFramework('soc2'), base + 1200);
-      const t3 = setTimeout(() => setComplianceFramework('hipaa'), base + 2800);
-      const t4 = setTimeout(() => setComplianceFramework('general'), base + 4400);
-      complianceTimersRef.current = [t1, t2, t3, t4];
-    }
+
 
     return () => {
       if (stepTimerRef.current) clearTimeout(stepTimerRef.current);
@@ -562,7 +559,9 @@ export default function ProductTour() {
   if (!step) return null;
 
   const StepIcon = step.icon;
-  const isFullscreen = step.targetId === null;
+  const nodes = useCanvasStore.getState().nodes;
+  const resolvedTargetId = typeof step.targetId === 'function' ? step.targetId(nodes) : step.targetId;
+  const isFullscreen = resolvedTargetId === null;
   const tooltipW = 400;
   const tooltipH = 260;
   const position = getTooltipPosition(spotlightRect, step.placement, tooltipW, tooltipH);
@@ -578,9 +577,7 @@ export default function ProductTour() {
       case 'cost-lens':
       case 'cost-node-interaction':
         return { text: 'text-emerald-500', iconBg: 'bg-emerald-50 dark:bg-emerald-500/10', iconBorder: 'border-emerald-200 dark:border-emerald-500/20' };
-      case 'security-lens':
-      case 'compliance-frameworks':
-        return { text: 'text-amber-500', iconBg: 'bg-amber-50 dark:bg-amber-500/10', iconBorder: 'border-amber-200 dark:border-amber-500/20' };
+
       case 'live-stream':
         return { text: 'text-red-500', iconBg: 'bg-red-50 dark:bg-red-500/10', iconBorder: 'border-red-200 dark:border-red-500/20' };
       case 'complete':
@@ -665,10 +662,10 @@ export default function ProductTour() {
                           <motion.div
                             key={i}
                             className={`rounded-full ${i === currentStep
-                                ? 'bg-[var(--gl-brand-accent,#7C6FF7)]'
-                                : i < currentStep
-                                  ? 'bg-[var(--gl-brand-accent,#7C6FF7)] opacity-50'
-                                  : 'bg-slate-200 dark:bg-slate-700'
+                              ? 'bg-[var(--gl-brand-accent,#7C6FF7)]'
+                              : i < currentStep
+                                ? 'bg-[var(--gl-brand-accent,#7C6FF7)] opacity-50'
+                                : 'bg-slate-200 dark:bg-slate-700'
                               }`}
                             initial={false}
                             animate={{

@@ -21,6 +21,9 @@ Located in the engines directory:
 *   **`_save_service_scan()`**: A database helper function that logs the execution time, status, and resource count of every individual service scanned, creating an audit trail.
 
 ### Workflow
+
+![scan orchestrator](image-1.png)
+
 1.  **Job Initialization:** Fetches the pending `ScanJob` and target `AwsAccount` from the database.
 2.  **Authentication:** Uses `aws_service._get_temp_credentials()` to perform an STS AssumeRole, acquiring temporary credentials for the target account.
 3.  **Regional Loop:** Iterates over a predefined list of `SCAN_REGIONS`.
@@ -56,7 +59,7 @@ Located in the engines directory:
 *   **Hardcoded Regions:** The target regions are strictly hardcoded at the top of the file (`SCAN_REGIONS = ['ap-south-1', 'us-east-1']`). It does not dynamically query AWS for active regions, meaning any resources deployed in `eu-west-1` or `us-west-2` will be completely ignored by the scanner.
 
 ### Performance considerations
-*   **Long-Running Blocking Thread:** Because it executes sequentially across regions and services, a scan of a large enterprise AWS account could take several minutes, blocking the Python worker thread. 
+*   **Long-Running Blocking Thread:** Because it executes sequentially across regions and services, a scan of a large enterprise AWS account could take several minutes, blocking the Python worker thread.
 
 ### Future improvements
 *   **Dynamic Region Discovery:** Replace the hardcoded `SCAN_REGIONS` array with a dynamic call to AWS `DescribeRegions` to automatically scan all regions where the user has active infrastructure.

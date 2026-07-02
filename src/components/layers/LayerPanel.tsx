@@ -61,6 +61,7 @@ export default function LayerPanel() {
   return (
     <div className="relative z-50">
       <Button
+        data-tour-id="layer-button"
         variant="outline"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 bg-white/80 dark:bg-[#111111] backdrop-blur-md border border-slate-200 dark:border-[#333333] shadow-sm rounded-xl px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#222222]"

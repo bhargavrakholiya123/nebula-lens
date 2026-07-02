@@ -8,7 +8,6 @@ import { AnimatePresence, motion, useSpring } from 'framer-motion';
 import { XIcon, TrendDownIcon, WarningIcon, ShieldWarningIcon, PulseIcon, HardDrivesIcon, LightningIcon, ShieldIcon, InfoIcon } from '@phosphor-icons/react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 import { useBlastRadius } from '../../hooks/useBlastRadius';
-import { useSecurityAudit } from '../../hooks/useSecurityAudit';
 import { slideInRight, slideOutRight, staggerContainer, staggerItem } from '../../lib/motion';
 import { PieChart } from "@/components/charts/pie-chart";
 import { PieSlice } from "@/components/charts/pie-slice";
@@ -25,7 +24,7 @@ const COST_COLORS = {
   CrossAZ: '#f97316'
 };
 
-const TABS = ['General', 'Metrics & Cost', 'Security', 'Blast Radius'];
+const TABS = ['General', 'Metrics & Cost', 'Blast Radius'];
 
 const tabContentVariants = {
   enter: { opacity: 0, y: 6 },
@@ -36,7 +35,7 @@ const tabContentVariants = {
 function AnimatedCounter({ value }: { value: number }) {
   const nodeRef = useRef<HTMLSpanElement>(null);
   const springValue = useSpring(0, { stiffness: 100, damping: 30 });
-  
+
   useEffect(() => {
     if (value > 100) {
       springValue.set(value);
@@ -64,7 +63,7 @@ function ComplianceProgressBar({ label, percentage }: { label: string, percentag
         <span>{percentage}%</span>
       </div>
       <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-        <motion.div 
+        <motion.div
           className="h-full bg-indigo-500 rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
@@ -76,7 +75,7 @@ function ComplianceProgressBar({ label, percentage }: { label: string, percentag
 }
 
 const getSeverityStyles = (severity: string) => {
-  switch(severity?.toLowerCase()) {
+  switch (severity?.toLowerCase()) {
     case 'critical': return "text-red-500 text-xs font-medium";
     case 'high': return "text-orange-500 text-xs font-medium";
     case 'medium': return "text-amber-500 text-xs font-normal";
@@ -89,7 +88,7 @@ export default function ContextualInspector() {
   const setSelectedNodeId = useCanvasStore((state) => state.setSelectedNodeId);
   const nodes = useCanvasStore((state) => state.nodes);
   const edges = useCanvasStore((state) => state.edges);
-  
+
   const activeLens = useCanvasStore((state) => state.activeLens);
   const complianceFramework = useCanvasStore((state) => state.complianceFramework);
   const isLiveStreamActive = useCanvasStore((state) => state.isLiveStreamActive);
@@ -119,7 +118,7 @@ export default function ContextualInspector() {
       }
     };
     const handleMouseUp = () => setIsResizing(false);
-    
+
     if (isResizing) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
@@ -138,8 +137,7 @@ export default function ContextualInspector() {
   const isExpanded = selectedNode !== undefined || isPinned || isHovered || isTourActive;
 
   useEffect(() => {
-    if (activeLens === 'security') setActiveTab('Security');
-    else if (activeLens === 'cost') setActiveTab('Metrics & Cost');
+    if (activeLens === 'cost') setActiveTab('Metrics & Cost');
     else if (activeLens === 'blast-radius') setActiveTab('Blast Radius');
     else setActiveTab('General');
   }, [activeLens, selectedNodeId]);
@@ -170,11 +168,6 @@ export default function ContextualInspector() {
   };
 
   const { affectedNodes } = useBlastRadius(selectedNodeId);
-  const { vulnerabilities, score } = useSecurityAudit();
-
-  const nodeVulnerabilities = useMemo(() => {
-    return vulnerabilities.filter(v => v.nodeId === selectedNodeId);
-  }, [vulnerabilities, selectedNodeId]);
 
   const formatMetricLabel = (str: string) => {
     const spaced = str.replace(/([A-Z])/g, ' $1');
@@ -242,9 +235,9 @@ export default function ContextualInspector() {
   }, [selectedNode]);
 
   return (
-    <div 
+    <div
       id="gl-inspector"
-      data-tour-id="inspector-panel" 
+      data-tour-id="inspector-panel"
       className={`relative h-full ${!isExpanded ? 'cursor-pointer' : ''} bg-white dark:bg-[#111111] border-l border-slate-200 dark:border-slate-800 z-30 flex flex-col shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.1)] ${isResizing ? '' : 'transition-all duration-[280ms] ease-in-out'} shrink-0`}
       style={{ width: isExpanded ? width : 48 }}
       onMouseEnter={handleMouseEnter}
@@ -253,7 +246,7 @@ export default function ContextualInspector() {
     >
       {/* Resizer Handle */}
       {isExpanded && (
-        <div 
+        <div
           className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-indigo-500/50 active:bg-indigo-500 z-40 transition-colors"
           onMouseDown={startResizing}
         />
@@ -267,7 +260,7 @@ export default function ContextualInspector() {
         </div>
       ) : (
         <AnimatePresence>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { duration: 0.2, delay: 0.1 } }}
             exit={{ opacity: 0, transition: { duration: 0.1 } }}
@@ -298,21 +291,23 @@ export default function ContextualInspector() {
             </div>
 
             {/* Tabs */}
-            <div className="flex px-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#111111] shrink-0">
+            <div className="flex flex-wrap items-stretch gap-y-1 px-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#111111] shrink-0">
               {TABS.map((tab) => (
                 <button
                   key={tab}
                   onClick={(e) => { e.stopPropagation(); setActiveTab(tab); }}
-                  className={`relative px-3 py-3 text-sm font-medium tracking-[0.7px] uppercase transition-colors ${
+                  className={`relative flex-1 min-w-[90px] px-2 py-3 text-xs sm:text-sm font-medium tracking-[0.7px] uppercase transition-colors text-center ${
                     activeTab === tab ? 'text-[var(--gl-text-primary)]' : 'text-[var(--gl-text-muted)] hover:text-slate-600 dark:hover:text-slate-300'
                   }`}
                 >
-                  {tab}
+                  <span className="block whitespace-normal break-words" title={tab}>
+                    {tab}
+                  </span>
                   {activeTab === tab && (
                     <motion.div
                       layoutId="tab-indicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500 rounded-full"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
                 </button>
@@ -396,7 +391,7 @@ export default function ContextualInspector() {
                               className={`px-3 py-1 text-xs font-medium tracking-[0.7px] uppercase rounded-full transition-all duration-300 border flex items-center gap-2 ${isLiveStreamActive
                                 ? 'bg-red-500/10 text-red-500 border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
-                              }`}
+                                }`}
                             >
                               {isLiveStreamActive ? (
                                 <><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /> Live</>
@@ -474,15 +469,14 @@ export default function ContextualInspector() {
                               <PieCenter prefix="$" />
                             </PieChart>
                           </div>
-                          
+
                           {/* Legend / Mini breakdown below */}
                           <div className="w-full px-4 mt-4 grid grid-cols-2 gap-2">
                             {pieChartData.map((slice, idx) => (
                               <div
                                 key={slice.label}
-                                className={`flex items-center gap-2 px-2 py-1 rounded transition-colors ${
-                                  hoveredSlice === idx ? 'bg-slate-200/50 dark:bg-slate-800/50' : ''
-                                }`}
+                                className={`flex items-center gap-2 px-2 py-1 rounded transition-colors ${hoveredSlice === idx ? 'bg-slate-200/50 dark:bg-slate-800/50' : ''
+                                  }`}
                                 onMouseEnter={() => setHoveredSlice(idx)}
                                 onMouseLeave={() => setHoveredSlice(null)}
                               >
@@ -541,85 +535,7 @@ export default function ContextualInspector() {
                     </motion.div>
                   )}
 
-                  {activeTab === 'Security' && (
-                    <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-6">
-                      {!selectedNode && (
-                        <motion.div variants={staggerItem} className="flex bg-slate-100 dark:bg-[#111111] rounded-lg p-1 border border-slate-200 dark:border-slate-800">
-                          {['general', 'soc2', 'hipaa'].map((fw) => (
-                            <button
-                              key={fw}
-                              onClick={(e) => { e.stopPropagation(); useCanvasStore.getState().setComplianceFramework(fw as any); }}
-                              className={`flex-1 text-xs font-medium tracking-[0.7px] uppercase py-1.5 rounded-md transition-all ${
-                                complianceFramework === fw
-                                  ? 'bg-white dark:bg-slate-800 text-[var(--gl-text-primary)] shadow-sm'
-                                  : 'text-[var(--gl-text-muted)] hover:text-[var(--gl-text-primary)]'
-                              }`}
-                            >
-                              {fw}
-                            </button>
-                          ))}
-                        </motion.div>
-                      )}
 
-                      {!selectedNode && (
-                        <motion.div variants={staggerItem} className="p-4 rounded-xl border bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50">
-                          <div className="flex items-center justify-between mb-4">
-                            <h4 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] flex items-center gap-2">
-                              <ShieldIcon weight="duotone" className="w-3 h-3 text-amber-500" /> Risk Score
-                            </h4>
-                            <span className="text-2xl font-medium tracking-[-0.5px] text-[var(--gl-text-primary)]">
-                              <AnimatedCounter value={score} /><span className="text-xs text-[var(--gl-text-muted)]">/100</span>
-                            </span>
-                          </div>
-                        </motion.div>
-                      )}
-
-                      <motion.div variants={staggerContainer} initial="initial" animate="animate">
-                        <h4 className="text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3 flex items-center gap-2">
-                          <ShieldIcon weight="duotone" className="w-3 h-3" /> Compliance Progress
-                        </h4>
-                        <ComplianceProgressBar label="SOC 2 Readiness" percentage={85} />
-                        <ComplianceProgressBar label="HIPAA Compliance" percentage={62} />
-                        <ComplianceProgressBar label="CIS Benchmarks" percentage={94} />
-                      </motion.div>
-
-                      <Separator className="bg-slate-200 dark:bg-slate-800" />
-
-                      <motion.div variants={staggerItem}>
-                        <h4 className={`text-xs font-medium tracking-[0.7px] uppercase text-[var(--gl-text-muted)] mb-3 flex items-center gap-2`}>
-                          <ShieldWarningIcon weight="duotone" className="w-3 h-3 text-amber-500" /> Active Misconfigurations
-                        </h4>
-                        {selectedNode ? (
-                          nodeVulnerabilities.length > 0 ? (
-                            <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-3">
-                              {nodeVulnerabilities.map((vuln, idx) => (
-                                <motion.div variants={staggerItem} key={idx} className="p-3 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-amber-100 dark:border-amber-900/30">
-                                  <p className={`${getSeverityStyles(vuln.severity)} mb-1`}>{vuln.issue}</p>
-                                  <p className="text-xs font-normal text-[var(--gl-text-muted)] border-l-2 border-amber-300 dark:border-amber-700 pl-2">
-                                    {vuln.remediation}
-                                  </p>
-                                </motion.div>
-                              ))}
-                            </motion.div>
-                          ) : (
-                            <p className="text-xs font-normal text-[var(--gl-text-muted)] italic">No compliance violations detected on this resource.</p>
-                          )
-                        ) : (
-                          <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-3">
-                            {vulnerabilities.map((vuln, idx) => (
-                              <motion.div variants={staggerItem} key={idx} className="p-3 rounded-lg bg-white/50 dark:bg-slate-900/50 border border-amber-100 dark:border-amber-900/30">
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-xs font-medium text-[var(--gl-text-muted)]">{vuln.name}</span>
-                                  <span className={getSeverityStyles(vuln.severity)}>{vuln.severity.toUpperCase()}</span>
-                                </div>
-                                <p className="text-xs font-normal text-[var(--gl-text-primary)] mb-2">{vuln.issue}</p>
-                              </motion.div>
-                            ))}
-                          </motion.div>
-                        )}
-                      </motion.div>
-                    </motion.div>
-                  )}
 
                   {activeTab === 'Blast Radius' && (
                     <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-6">

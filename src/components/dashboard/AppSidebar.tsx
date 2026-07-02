@@ -73,8 +73,8 @@ function AppSidebarInner(props: React.ComponentProps<typeof Sidebar>) {
       onMouseLeave={handleMouseLeave}
       {...props}
     >
-      <SidebarHeader className="border-b border-[var(--gl-border)] px-4 py-3 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-3 flex items-center justify-between group-data-[collapsible=icon]:justify-center">
-        <div className="flex items-center gap-2 select-none group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 w-full">
+      <SidebarHeader className="h-14 p-0 px-4 flex flex-row items-center border-b border-[var(--gl-border)] group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center shrink-0">
+        <div className="flex flex-row items-center gap-2 select-none group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 w-full">
           <img
             src="/logo/singleLogo.svg"
             alt="GravityLens Logo"

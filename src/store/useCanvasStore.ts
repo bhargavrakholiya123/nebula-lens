@@ -86,16 +86,14 @@ export const useCanvasStore = create<CanvasState>()(
 
       onNodesChange: (changes: NodeChange[]) => {
         // Fix 2: Filter out zero-dimension change events.
-        // React Flow fires `dimensions` changes with { width: 0, height: 0 } during
-        // the initial DOM measuring pass (before nodes are painted). Applying those
-        // zeros would corrupt the stored width/height and make ELK pack everything
-        // at the same point, which is also why manual auto-layout cannot recover.
         const safeChanges = changes.filter(c => {
           if (c.type === 'dimensions') {
             return (c.dimensions?.width ?? 0) > 0 && (c.dimensions?.height ?? 0) > 0;
           }
           return true;
         });
+
+        if (safeChanges.length === 0) return;
 
         let nextNodes = applyNodeChanges(safeChanges, get().nodes) as CloudNode[];
         
@@ -120,7 +118,19 @@ export const useCanvasStore = create<CanvasState>()(
           });
         }
         
-        set({ nodes: nextNodes });
+        // Only track meaningful changes in Undo/Redo history (like moving or deleting nodes)
+        // Selection ('select') and ResizeObserver measurements ('dimensions') should not clear the redo stack.
+        const shouldTrackInHistory = safeChanges.some(c => 
+          c.type === 'position' || c.type === 'remove' || c.type === 'add'
+        );
+
+        if (!shouldTrackInHistory) {
+          useCanvasStore.temporal.getState().pause();
+          set({ nodes: nextNodes });
+          useCanvasStore.temporal.getState().resume();
+        } else {
+          set({ nodes: nextNodes });
+        }
       },
       updateNodeDimensions: (id: string, width: number, height: number) => {
         set((state) => ({
@@ -142,7 +152,22 @@ export const useCanvasStore = create<CanvasState>()(
         }));
       },
       onEdgesChange: (changes: EdgeChange[]) => {
-        set({ edges: applyEdgeChanges(changes, get().edges) as CloudEdge[] });
+        if (changes.length === 0) return;
+        
+        const nextEdges = applyEdgeChanges(changes, get().edges) as CloudEdge[];
+        
+        // Only track structural changes in history
+        const shouldTrackInHistory = changes.some(c => 
+          c.type === 'remove' || c.type === 'add'
+        );
+
+        if (!shouldTrackInHistory) {
+          useCanvasStore.temporal.getState().pause();
+          set({ edges: nextEdges });
+          useCanvasStore.temporal.getState().resume();
+        } else {
+          set({ edges: nextEdges });
+        }
       },
       onConnect: (connection: Connection) => {
         set({ edges: addEdge(connection, get().edges) as CloudEdge[] });
@@ -188,53 +213,57 @@ export const useCanvasStore = create<CanvasState>()(
       hoveredEdgeId: null,
       setHoveredEdgeId: (id) => set({ hoveredEdgeId: id }),
 
-      tickTelemetry: () => set((state) => {
-        const newNodes = state.nodes.map(node => {
-          // Skip nodes that don't have telemetry (like the AZ wrapper)
-          if (!node.data?.telemetryData || !Array.isArray(node.data.telemetryData)) return node;
+      tickTelemetry: () => {
+        useCanvasStore.temporal.getState().pause();
+        set((state) => {
+          const newNodes = state.nodes.map(node => {
+            // Skip nodes that don't have telemetry (like the AZ wrapper)
+            if (!node.data?.telemetryData || !Array.isArray(node.data.telemetryData)) return node;
 
-          const currentData = [...node.data.telemetryData];
-          const lastPoint = currentData[currentData.length - 1];
+            const currentData = [...node.data.telemetryData];
+            const lastPoint = currentData[currentData.length - 1];
 
-          // Generate a live timestamp (HH:MM:SS)
-          const now = new Date();
-          const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            // Generate a live timestamp (HH:MM:SS)
+            const now = new Date();
+            const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
-          const newPoint: any = { time: timeString };
+            const newPoint: any = { time: timeString };
 
-          // Apply random jitter to all numeric metrics to simulate live traffic
-          Object.keys(lastPoint).forEach(key => {
-            if (key !== 'time') {
-              let val = Number(lastPoint[key]);
-              let jitter = 0;
+            // Apply random jitter to all numeric metrics to simulate live traffic
+            Object.keys(lastPoint).forEach(key => {
+              if (key !== 'time') {
+                let val = Number(lastPoint[key]);
+                let jitter = 0;
 
-              if (val === 0) {
-                // THE SMART DEFIBRILLATOR:
-                // If a metric naturally hits 0 (like an empty SQS queue), we give it
-                // a 30% chance to randomly spawn 1-5 new events to jump-start the math.
-                jitter = Math.random() > 0.7 ? Math.floor(Math.random() * 5) + 1 : 0;
-              } else {
-                // Normal percentage-based chaos
-                jitter = val * (Math.random() * 1.6 - 0.8);
+                if (val === 0) {
+                  // THE SMART DEFIBRILLATOR:
+                  // If a metric naturally hits 0 (like an empty SQS queue), we give it
+                  // a 30% chance to randomly spawn 1-5 new events to jump-start the math.
+                  jitter = Math.random() > 0.7 ? Math.floor(Math.random() * 5) + 1 : 0;
+                } else {
+                  // Normal percentage-based chaos
+                  jitter = val * (Math.random() * 1.6 - 0.8);
+                }
+
+                // Apply jitter, ensuring it never goes negative
+                newPoint[key] = Math.max(0, Math.floor(val + jitter));
               }
+            });
 
-              // Apply jitter, ensuring it never goes negative
-              newPoint[key] = Math.max(0, Math.floor(val + jitter));
-            }
+            // Append new data and keep the array constrained to 6 data points to prevent memory leaks
+            currentData.push(newPoint);
+            if (currentData.length > 6) currentData.shift();
+
+            return {
+              ...node,
+              data: { ...node.data, telemetryData: currentData }
+            };
           });
 
-          // Append new data and keep the array constrained to 6 data points to prevent memory leaks
-          currentData.push(newPoint);
-          if (currentData.length > 6) currentData.shift();
-
-          return {
-            ...node,
-            data: { ...node.data, telemetryData: currentData }
-          };
+          return { nodes: newNodes };
         });
-
-        return { nodes: newNodes };
-      }),
+        useCanvasStore.temporal.getState().resume();
+      },
 
       fetchInfrastructure: async (snapshotId) => {
         if (get().isLoading) return;

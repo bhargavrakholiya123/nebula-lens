@@ -76,7 +76,7 @@ export const useDashboardStore = create<DashboardState>()(
 
       // AWS
       isAwsConnected: true,
-      awsRegion: "us-east-1",
+      awsRegion: "ap-south-1",
       setAwsConnected: (connected) => set({ isAwsConnected: connected }),
 
       // Alerts
@@ -89,6 +89,10 @@ export const useDashboardStore = create<DashboardState>()(
     }),
     {
       name: "gl-dashboard-store",
+      version: 1, // Bump version to clear old cached 'awsRegion'
+      migrate: (persistedState: any, version: number) => {
+        return persistedState;
+      },
       partialize: (s) => ({
         leftPanelOpen: s.leftPanelOpen,
         rightPanelOpen: s.rightPanelOpen,
