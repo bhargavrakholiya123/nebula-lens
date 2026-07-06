@@ -16,7 +16,7 @@ interface TourStep {
   title: string;
   description: string;
   icon: React.ElementType;
-  targetId: string | null | ((nodes: any[]) => string | null);
+  targetId: string | null | ((nodes: Record<string, unknown>[]) => string | null);
   placement: TooltipPlacement;
   spotlightPadding?: number;
   spotlightRadius?: number;
@@ -26,9 +26,9 @@ interface TourStep {
 }
 
 interface StoreActions {
-  setActiveLens: (lens: any) => void;
+  setActiveLens: (lens: string) => void;
   setSelectedNodeId: (id: string | null) => void;
-  setComplianceFramework: (fw: any) => void;
+  setComplianceFramework: (fw: string) => void;
   toggleLiveStream: () => void;
   setTourActive: (active: boolean) => void;
 }
@@ -46,19 +46,19 @@ interface SpotlightRect {
 //   → 5. Blast Inspector → 6. Cost → 7. Cost Inspector → 8. Security
 //   → 9. Compliance → 10. Undo/Redo → 11. Export → 12. Complete
 // ────────────────────────────────────────────────────────────────────────────
-const getDbNodeId = (nodes: any[]) => {
+const getDbNodeId = (nodes: Record<string, unknown>[]) => {
   const dbNode = nodes.find(n => typeof n.type === 'string' && (n.type.toLowerCase().includes('db') || n.type.toLowerCase().includes('mongo')));
-  return dbNode ? dbNode.id : (nodes[0]?.id || null);
+  return dbNode ? (dbNode.id as string) : (nodes[0]?.id as string | null);
 };
 
-const getGatewayNodeId = (nodes: any[]) => {
+const getGatewayNodeId = (nodes: Record<string, unknown>[]) => {
   const gwNode = nodes.find(n => typeof n.type === 'string' && (n.type.toLowerCase().includes('gateway') || n.type.toLowerCase().includes('ingress')));
-  return gwNode ? gwNode.id : (nodes[0]?.id || null);
+  return gwNode ? (gwNode.id as string) : (nodes[0]?.id as string | null);
 };
 
-const getComputeNodeId = (nodes: any[]) => {
+const getComputeNodeId = (nodes: Record<string, unknown>[]) => {
   const computeNode = nodes.find(n => typeof n.type === 'string' && (n.type.toLowerCase().includes('lambda') || n.type.toLowerCase().includes('compute') || n.type.toLowerCase().includes('ec2')));
-  return computeNode ? computeNode.id : (nodes[0]?.id || null);
+  return computeNode ? (computeNode.id as string) : (nodes[0]?.id as string | null);
 };
 
 const TOUR_STEPS: TourStep[] = [

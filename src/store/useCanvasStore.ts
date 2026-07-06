@@ -3,18 +3,15 @@ import { create } from 'zustand';
 import { temporal } from 'zundo';
 import {
   Connection,
-  Edge,
   EdgeChange,
-  Node,
   NodeChange,
   addEdge,
   applyNodeChanges,
   applyEdgeChanges,
 } from '@xyflow/react';
-import { useLayerStore } from './layerStore';
 
 // Import our mock data
-import initialData from '../data/latestdata.json' assert { type: 'json' };
+import initialData from '../data/latestdata.json' with { type: 'json' };
 import { CloudNode, CloudEdge } from '../types/cloud';
 
 // 🚀 FIX: Added 'security' to the allowed lens types
@@ -39,7 +36,7 @@ type CanvasState = {
   // AWS Account state
   selectedAccountId: string | null;
   setSelectedAccountId: (id: string | null) => void;
-  connectedAccounts: any[];
+  connectedAccounts: Record<string, unknown>[];
   fetchConnectedAccounts: () => Promise<void>;
 
   // Lens State
@@ -227,12 +224,12 @@ export const useCanvasStore = create<CanvasState>()(
             const now = new Date();
             const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
-            const newPoint: any = { time: timeString };
+            const newPoint: Record<string, string | number> = { time: timeString };
 
             // Apply random jitter to all numeric metrics to simulate live traffic
             Object.keys(lastPoint).forEach(key => {
               if (key !== 'time') {
-                let val = Number(lastPoint[key]);
+                const val = Number(lastPoint[key]);
                 let jitter = 0;
 
                 if (val === 0) {

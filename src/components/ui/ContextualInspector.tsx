@@ -137,8 +137,11 @@ export default function ContextualInspector() {
   const isExpanded = selectedNode !== undefined || isPinned || isHovered || isTourActive;
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (activeLens === 'cost') setActiveTab('Metrics & Cost');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     else if (activeLens === 'blast-radius') setActiveTab('Blast Radius');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     else setActiveTab('General');
   }, [activeLens, selectedNodeId]);
 

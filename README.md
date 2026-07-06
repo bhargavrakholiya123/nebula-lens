@@ -367,6 +367,9 @@ graph TB
 
 ### Scan-Triggered Infrastructure Discovery
 
+<<<<<<< HEAD
+![workflow](image.png)
+=======
 ```mermaid
 sequenceDiagram
     participant User as 🖥️ Frontend
@@ -429,6 +432,7 @@ sequenceDiagram
     Note over User: ELK.js computes layout client-side
     User->>User: Render React Flow topology canvas
 ```
+>>>>>>> 4ce6e94e1e40576506eda62d08ce4ae27293e4cb
 
 ---
 
